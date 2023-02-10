@@ -130,8 +130,8 @@ func gatherInput() (title, description string) {
 	// perform the questions
 	err = survey.Ask(qs, &answers)
 	if err != nil {
-		pterm.Error.Printfln("gatherInput: %v", err)
-		os.Exit(1)
+		pterm.Warning.Printfln("gatherInput() you must have forgotten something: %v", err)
+		os.Exit(0)
 	}
 	if answers.Scope != "" {
 		answers.Scope = "(" + answers.Scope + "):"

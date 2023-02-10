@@ -69,8 +69,8 @@ func installAzureCLILinux() {
 
 	err := survey.AskOne(qs, &response)
 	if err != nil {
-		pterm.Error.Println(err.Error())
-		os.Exit(1)
+		pterm.Warning.Printfln("installAzureCLILinux() you changed your mind: %v", err)
+		os.Exit(0)
 	}
 
 	if !response {

@@ -84,8 +84,8 @@ func setup() {
 	// perform the questions
 	err := survey.Ask(qs, &answers)
 	if err != nil {
-		pterm.Error.Printfln("init() survey.Ask: %v", err)
-		os.Exit(1)
+		pterm.Warning.Printfln("init() you changed your mind: %v", err)
+		os.Exit(0)
 	}
 
 	cmd = exec.Command("az", "devops", "configure", "--defaults", fmt.Sprintf("organization=%s", answers.Organization), fmt.Sprintf("project=%s", answers.Project))

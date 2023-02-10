@@ -16,7 +16,7 @@ It's a wrapper and done with limited time so lots to cleanup, but since it's rep
 Feel free to create a PR or an issue for any issues experienced and if I can improve it I will.
 Hope it helps you out in your workflow a bit and helps you avoid the Azure DevOps web ui a litle bit longer.
 
-## Run
+## Install
 
 Use Go 1.18+.
 This should grab the latest tagged version.
@@ -25,6 +25,16 @@ Upgrade the same way.
 ```shell
 go install github.com/sheldonhull/az-pr@latest
 ```
+
+## Check Requirements
+
+You need to have an access token configured, so this will check and make sure the requirements to run are setup correctly.
+
+```shell
+az-pr check
+```
+
+## Install from Source With Go
 
 If you don't have Go tools typically setup, then here's something to add your profile to make sure the binary is found.
 This would be your `$HOME/.zshenv` or `$HOME/.bashrc`.

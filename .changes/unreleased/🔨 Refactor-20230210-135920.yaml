@@ -1,0 +1,7 @@
+kind: "\U0001F528 Refactor"
+body:
+  Add mention of `az-pr check` at the top so that required environment variable
+  is correctly configured. I might revisit the login method later to see if I can
+  use SSO login with cli and not require the token. I've just done the token approach
+  for so long and know it works. Will come back round eventually to that.
+time: 2023-02-10T13:59:20.739188-06:00
