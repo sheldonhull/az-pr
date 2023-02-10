@@ -6,6 +6,8 @@ package main
 
 import (
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
@@ -84,4 +86,29 @@ func Clean() {
 		pterm.Success.Printf("🧹 [%s] dir removed\n", dir)
 	}
 	mg.Deps(createDirectories)
+}
+
+// Release using github cli (for now)
+func Release() error {
+	version, changelogFile, err := getVersion()
+	if err != nil {
+		pterm.Error.Printfln("failed to get version: %v", err)
+		return err
+	}
+	return sh.Run("gh", "release", "create", version, "--title", version, "--notes-file", changelogFile, "--target", "main")
+}
+
+// getVersion returns the version and path for the changefile to use for the semver and release notes.
+func getVersion() (releaseVersion, cleanPath string, err error) {
+	releaseVersion, err = sh.Output("changie", "latest")
+	if err != nil {
+		pterm.Error.Printfln("changie pulling latest release note version failure: %v", err)
+		return "", "", err
+	}
+	cleanVersion := strings.TrimSpace(releaseVersion)
+	cleanPath = filepath.Join(".changes", cleanVersion+".md")
+	if os.Getenv("GITHUB_WORKSPACE") != "" {
+		cleanPath = filepath.Join(os.Getenv("GITHUB_WORKSPACE"), ".changes", cleanVersion+".md")
+	}
+	return cleanVersion, cleanPath, nil
 }
