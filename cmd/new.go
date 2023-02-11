@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 
@@ -13,6 +14,9 @@ import (
 
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
+
+	"github.com/charmbracelet/bubbles/textarea"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 // newCmd represents the new command
@@ -97,21 +101,27 @@ var qs = []*survey.Question{
 			Message: "Choose a conventional commit type",
 			Options: _conventionalCommitTypes,
 		},
+		Validate: survey.Required,
 	},
 	{
 		Name:      "scope",
-		Prompt:    &survey.Input{Message: "Scope (optional)"},
+		Prompt:    &survey.Input{Message: "Scope (optional, enter to skip)"},
 		Transform: survey.ToLower,
 	},
 	{
 		Name:      "title",
 		Prompt:    &survey.Input{Message: "Title"},
 		Transform: survey.ToLower,
+		Validate:  survey.Required,
 	},
-	{
-		Name:   "description",
-		Prompt: &survey.Multiline{Message: "Description (imperative & active voice)", Help: "Write imperative and active voice \nwith multiple lines for each bullet point."},
-	},
+	// ,
+	// {
+	// 	Name: "description",
+	// 	Prompt: &survey.Multiline{
+	// 		Message: "Description (imperative & active voice)",
+	// 		Help:    "Write imperative and active voice \nwith multiple lines for each bullet point.",
+	// 	},
+	// },
 }
 
 func gatherInput() (title, description string) {
@@ -133,6 +143,17 @@ func gatherInput() (title, description string) {
 		pterm.Warning.Printfln("gatherInput() you must have forgotten something: %v", err)
 		os.Exit(0)
 	}
+	p := tea.NewProgram(initialModel())
+
+	mod, err := p.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
+	myModelInstance, ok := mod.(model)
+	if !ok {
+		pterm.Warning.Printfln("gatherInput() issue in gather input from text input. I goofed. not your fault. ## ShouldHaveDoneTDD: %v", err)
+	}
+	description = myModelInstance.textarea.Value()
 	if answers.Scope != "" {
 		answers.Scope = "(" + answers.Scope + "):"
 	} else {
@@ -141,7 +162,8 @@ func gatherInput() (title, description string) {
 	title = fmt.Sprintf("%s%s %s%s", answers.Type, answers.Scope, emojify(answers.Type), answers.Title)
 	pterm.Info.Println(title)
 
-	pterm.Info.Println("\n" + answers.Description)
+	// pterm.Info.Println("\n" + answers.Description)
+	pterm.Info.Printfln("\n%s", description)
 	return title, description
 }
 
@@ -270,4 +292,68 @@ func createPR() {
 	// 	fmt.Sprintf("%d", prResponse.PullRequestID),
 	// )
 	// pterm.Success.Printf("Pull Request Url: %s\n", url)
+}
+
+type errMsg error
+
+type model struct {
+	textarea textarea.Model
+	err      error
+}
+
+func initialModel() model {
+	ti := textarea.New()
+	ti.Placeholder = "- Implement tacos in app..."
+	ti.Focus()
+
+	return model{
+		textarea: ti,
+		err:      nil,
+	}
+}
+
+func (m model) Init() tea.Cmd {
+	return textarea.Blink
+}
+
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmds []tea.Cmd
+	var cmd tea.Cmd
+
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.Type {
+		case tea.KeyEsc:
+			if m.textarea.Focused() {
+				m.textarea.Blur()
+			}
+		case tea.KeyCtrlC:
+			pterm.Warning.Println("ctrl+c pressed. exiting... make up your mind please")
+			os.Exit(0)
+		case tea.KeyCtrlD:
+			return m, tea.Quit
+		default:
+			if !m.textarea.Focused() {
+				cmd = m.textarea.Focus()
+				cmds = append(cmds, cmd)
+			}
+		}
+
+	// We handle errors just like any other message
+	case errMsg:
+		m.err = msg
+		return m, nil
+	}
+
+	m.textarea, cmd = m.textarea.Update(msg)
+	cmds = append(cmds, cmd)
+	return m, tea.Batch(cmds...)
+}
+
+func (m model) View() string {
+	return fmt.Sprintf(
+		"Summary of changes and why?\n\n%s\n\n%s",
+		m.textarea.View(),
+		"(ctrl+d to save, ctrl+c to quit)",
+	) + "\n\n"
 }
