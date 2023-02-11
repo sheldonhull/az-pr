@@ -1,5 +1,0 @@
-kind: "\U0001F528 Refactor"
-body:
-  Made `Ctrl+C` termination output a warning instead of nasty red error messages.
-  After all, I care about the user.
-time: 2023-02-10T13:58:13.443346-06:00
