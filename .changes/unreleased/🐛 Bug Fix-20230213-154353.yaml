@@ -1,0 +1,5 @@
+kind: "\U0001F41B Bug Fix"
+body:
+  Fix output formatting that was using println without formatting directive in
+  `init()` command.
+time: 2023-02-13T15:43:53.661823-06:00

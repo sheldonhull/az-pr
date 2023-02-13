@@ -1,3 +1,4 @@
+//nolint:gochecknoglobals // cobra uses globals for commands
 package cmd
 
 import (

@@ -1,3 +1,4 @@
+//nolint:gochecknoglobals // cobra uses globals for commands
 package cmd
 
 import (
@@ -255,20 +256,27 @@ func createPR() {
 	title, description := gatherInput()
 	args := []string{
 		"repos", "pr", "create",
+		"--output", "json", // i had issues when passing at end, so make this the first arg
 		"--title", title,
 		"--auto-complete", "true",
 		"--delete-source-branch", "true",
 		"--squash",
-		"--output", "json",
 		"--transition-work-items", "true",
 		"--open",
 		"--target-branch", branchName, // can't use autodetect with ssh so have to be specific: Per error: DevOps SSH URLs are not supported for repo auto-detection yet. https://github.com/Microsoft/azure-devops-cli-extension/issues/142
 		"--description", description,
 	}
 
-	type pr struct {
-		PullRequestID int `json:"pullRequestId"` //nolint:tagliatelle // PullRequestID is a field in the json response.
+	// Repository contains the response URL for the PR
+	type Repository struct {
+		WebURL string `json:"webUrl"` //nolint:tagliatelle // this is output from azure-cli I don't control
 	}
+	// PullRequestResponse contains the response from the PR creation, captured the azure-cli.
+	type PullRequestResponse struct {
+		PullRequestID int        `json:"pullRequestId"` //nolint:tagliatelle // this is output from azure-cli I don't control
+		Repository    Repository `json:"repository"`    //nolint:tagliatelle // this is output from azure-cli I don't control
+	}
+
 	cmd := exec.Command("az", args...)
 
 	pterm.Debug.Printfln("az %s", cmd.String())
@@ -278,20 +286,19 @@ func createPR() {
 		pterm.Error.Printfln("out: %s", out)
 		pterm.Error.Printfln("err: %v", err)
 	}
-	prResponse := pr{}
+	prResponse := PullRequestResponse{}
 	if err := json.Unmarshal(out, &prResponse); err != nil {
 		pterm.Error.Printf("unmarshal failure: %v\n", err)
 		pterm.Debug.Printf("out:\n%s\n", string(out))
 	}
+
 	// to give better control when running in container, i want to output the url to the console to control click.
-	// url := fmt.Sprintf(
-	// 	"%s/%s/_git/%s/pullrequest/%s",
-	// 	AzureDevopsOrg,
-	// 	AzureDevopsProject,
-	// 	RepoName,
-	// 	fmt.Sprintf("%d", prResponse.PullRequestID),
-	// )
-	// pterm.Success.Printf("Pull Request Url: %s\n", url)
+	url := fmt.Sprintf(
+		"%s/pullrequest/%d",
+		prResponse.Repository.WebURL,
+		prResponse.PullRequestID,
+	)
+	pterm.Success.Printf("Pull Request Url: %s\n", url)
 }
 
 type errMsg error

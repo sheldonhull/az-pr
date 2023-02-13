@@ -1,6 +1,3 @@
-/*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -94,5 +91,5 @@ func setup() {
 	if err := cmd.Run(); err != nil {
 		pterm.Error.Printfln("init() az extension add --name azure-devops: %v", err)
 	}
-	pterm.Success.Println("init() %s", cmd.String())
+	pterm.Success.Printfln("init() %s", cmd.String())
 }

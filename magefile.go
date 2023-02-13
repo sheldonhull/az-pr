@@ -44,7 +44,7 @@ func createDirectories() error {
 }
 
 // ⚡ Init runs multiple tasks to initialize all the requirements for running a project for a new contributor.
-func Init() error {
+func Init() {
 	fancy.IntroScreen(ci.IsCI())
 	pterm.Success.Println("running Init()...")
 
@@ -56,7 +56,7 @@ func Init() error {
 	pterm.DefaultSection.Println("CI Tooling")
 	if ci.IsCI() {
 		pterm.Success.Println("done with CI specific tooling. since detected in CI context, ending init early as core requirements met")
-		return nil
+		return
 	}
 
 	mg.SerialDeps(
@@ -72,7 +72,6 @@ func Init() error {
 			"This is optional, but will ensure every tool for the project is installed and matching version." +
 			"To install see developer docs or go to https://aquaproj.github.io/docs/reference/install")
 	}
-	return nil
 }
 
 // 🗑️ Clean up after yourself.
