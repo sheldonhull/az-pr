@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"os"
+	"os/exec"
 	"runtime"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -95,5 +96,47 @@ func installAzureCLILinux() {
 }
 
 func installAzureCLIWindows() {
-	pterm.Warning.Println("... not yet implemented")
+	installType, _ := pterm.DefaultInteractiveSelect.
+		WithOptions([]string{"scoop", "choco", "winget"}).
+		Show()
+	pterm.Info.Printfln("attempting install by %s", installType)
+
+	if installType == "scoop" {
+		// if scoop is found in path then use this to install azure-cli
+		_, err := exec.LookPath("scoop")
+		if err == nil {
+			pterm.DefaultSection.Printfln("installing azure-cli via scoop")
+			_, _ = script.Exec("scoop install azure-cli").Stdout()
+			return
+		} else {
+			pterm.Warning.Printfln("scoop not found in path: %v", err)
+		}
+	}
+
+	if installType == "choco" {
+
+		// if choco is found then use this to install azure-cli
+		_, err := exec.LookPath("choco")
+		if err == nil {
+			pterm.DefaultSection.Printfln("installing azure-cli via choco")
+			_, _ = script.Exec("choco install azure-cli").Stdout()
+			return
+		} else {
+			pterm.Warning.Printfln("choco not found in path: %v", err)
+		}
+	}
+
+	// if winget is found then use this to install azure-cli
+	if installType == "winget" {
+		_, err := exec.LookPath("winget")
+		if err == nil {
+			pterm.DefaultSection.Printfln("installing azure-cli via winget")
+			_, _ = script.Exec("winget install -e --id Microsoft.AzureCLI").Stdout()
+			return
+		} else {
+			pterm.Warning.Printfln("winget not found in path: %v", err)
+		}
+	}
+
+	// else warn can't to go install manually.
 }
