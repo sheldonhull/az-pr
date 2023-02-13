@@ -1,0 +1,29 @@
+version: 0.1
+cli:
+  version: 1.4.1
+plugins:
+  sources:
+    - id: trunk
+      ref: v0.0.10
+      uri: https://github.com/trunk-io/plugins
+lint:
+  enabled:
+    - markdownlint@0.33.0
+    - taplo@0.7.0
+    - gofmt@1.19.3
+    - prettier@2.8.4
+    - git-diff-check
+    - gitleaks@8.15.3
+    - yamllint@1.29.0
+    - golangci-lint@1.51.1
+runtimes:
+  enabled:
+    - go@>=1.18.1
+    - node@18.12.1
+    - python@3.10.8
+actions:
+  enabled:
+    - trunk-announce
+    - trunk-check-pre-push
+    - trunk-fmt-pre-commit
+    - trunk-upgrade-available
