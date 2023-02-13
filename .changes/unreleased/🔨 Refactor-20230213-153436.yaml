@@ -1,7 +1,0 @@
-kind: "\U0001F528 Refactor"
-body:
-  The output from the azure-cli is now captured and parsed to construct a clickable
-  url in the terminal output for the pull request. This helps support cases where
-  the environment doesn't work with the azure-cli `--open` flag, such as devcontainers,
-  remote ssh, and other remote environments.
-time: 2023-02-13T15:34:36.472025-06:00
