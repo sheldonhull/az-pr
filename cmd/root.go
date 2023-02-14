@@ -4,6 +4,8 @@ package cmd
 import (
 	"os"
 
+	"github.com/charmbracelet/lipgloss"
+	"github.com/elewis787/boa"
 	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -30,6 +32,17 @@ func Execute() {
 		ExecName: cc.Bold,
 		Flags:    cc.Bold,
 	})
+	styles := boa.DefaultStyles()
+	styles.Title.BorderForeground(lipgloss.AdaptiveColor{Light: `#E3BD2D`, Dark: `#E3BD2D`})
+	styles.Border.BorderForeground(lipgloss.AdaptiveColor{Light: `#E3BD2D`, Dark: `#E3BD2D`})
+	styles.SelectedItem.Foreground(lipgloss.AdaptiveColor{Light: `#353C3B`, Dark: `#353C3B`}).
+		Background(lipgloss.AdaptiveColor{Light: `#E3BD2D`, Dark: `#E3BD2D`})
+
+	b := boa.New(boa.WithStyles(styles))
+
+	rootCmd.SetUsageFunc(b.UsageFunc)
+	rootCmd.SetHelpFunc(b.HelpFunc)
+
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
