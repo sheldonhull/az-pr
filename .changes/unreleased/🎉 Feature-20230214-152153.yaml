@@ -1,7 +1,0 @@
-kind: "\U0001F389 Feature"
-body:
-  When running `az-pr` by itself, it uses boa (powered by Bubbletea from Charm)
-  to allow exploration of the subcommands and help content. This might be replaced
-  later, but is a nice experiment for better user exploration without running `--help`
-  on every level of subcommand.
-time: 2023-02-14T15:21:53.983957-06:00

@@ -7,9 +7,14 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"regexp"
+	"strings"
+	"time"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/maaslalani/confetty/confetti"
+	"github.com/magefile/mage/sh"
 
 	"github.com/go-git/go-git/v5"
 
@@ -24,7 +29,11 @@ import (
 var newCmd = &cobra.Command{
 	Use:   "new",
 	Short: "🚀 Create a new PR",
-	Long:  `Use this command to create a new PR. It will ask you a few questions and help you create a PR with an interactive prompt.`,
+	Long: `Use this command to create a new PR.
+	It will ask you a few questions and help you create a PR with an interactive prompt.
+
+	If you don't like confetti, you can disable it by setting the environment variable CONFETTI=1.
+	I'll probably add a flag to disable in the future, but till then yeah 🎊🎉`,
 	Run: func(cmd *cobra.Command, args []string) {
 		createPR()
 	},
@@ -115,6 +124,19 @@ var qs = []*survey.Question{
 		Transform: survey.ToLower,
 		Validate:  survey.Required,
 	},
+	{
+		Name:      "workitems",
+		Prompt:    &survey.Input{Message: "workitems (comma separate for multiple)"},
+		Transform: survey.ToLower,
+	},
+	{
+		Name: "draft",
+		Prompt: &survey.Select{
+			Message: "draft (true/false)",
+			Default: "false",
+			Options: []string{"true", "false"},
+		},
+	},
 	// ,
 	// {
 	// 	Name: "description",
@@ -125,7 +147,7 @@ var qs = []*survey.Question{
 	// },
 }
 
-func gatherInput() (title, description string) {
+func gatherInput() (title, description, workitems, draft string) {
 	if Debug {
 		pterm.EnableDebugMessages()
 	}
@@ -136,6 +158,8 @@ func gatherInput() (title, description string) {
 		Scope       string `survey:"color"`
 		Title       string `survey:"title"`
 		Description string `survey:"description"`
+		WorkItems   string `survey:"workitems"`
+		Draft       string `survey:"draft"`
 	}{}
 
 	// perform the questions
@@ -163,11 +187,14 @@ func gatherInput() (title, description string) {
 	title = fmt.Sprintf("%s%s %s%s", answers.Type, answers.Scope, emojify(answers.Type), answers.Title)
 	pterm.Info.Println(title)
 
+	draft = answers.Draft
+	workitems = answers.WorkItems
 	// pterm.Info.Println("\n" + answers.Description)
 	pterm.Info.Printfln("\n%s", description)
-	return title, description
+	return title, description, workitems, draft
 }
 
+// trunk-ignore(golangci-lint/funlen)
 func getUpstreamBranch() (branchName string, err error) {
 	if Debug {
 		pterm.EnableDebugMessages()
@@ -253,11 +280,12 @@ func createPR() {
 		os.Exit(1)
 	}
 
-	title, description := gatherInput()
+	title, description, workitems, draft := gatherInput()
 	args := []string{
 		"repos", "pr", "create",
 		"--output", "json", // i had issues when passing at end, so make this the first arg
 		"--title", title,
+		"--draft", draft,
 		"--auto-complete", "true",
 		"--delete-source-branch", "true",
 		"--squash",
@@ -266,7 +294,7 @@ func createPR() {
 		"--target-branch", branchName, // can't use autodetect with ssh so have to be specific: Per error: DevOps SSH URLs are not supported for repo auto-detection yet. https://github.com/Microsoft/azure-devops-cli-extension/issues/142
 		"--description", description,
 	}
-
+	pterm.Debug.Printfln("args: %v", args)
 	// Repository contains the response URL for the PR
 	type Repository struct {
 		WebURL string `json:"webUrl"` //nolint:tagliatelle // this is output from azure-cli I don't control
@@ -285,11 +313,13 @@ func createPR() {
 		pterm.Error.Printf("failure running azure-cli via az-cli:\n%v\n\n", err)
 		pterm.Error.Printfln("out: %s", out)
 		pterm.Error.Printfln("err: %v", err)
+		os.Exit(1)
 	}
 	prResponse := PullRequestResponse{}
 	if err := json.Unmarshal(out, &prResponse); err != nil {
 		pterm.Error.Printf("unmarshal failure: %v\n", err)
 		pterm.Debug.Printf("out:\n%s\n", string(out))
+		os.Exit(1)
 	}
 
 	// to give better control when running in container, i want to output the url to the console to control click.
@@ -299,6 +329,44 @@ func createPR() {
 		prResponse.PullRequestID,
 	)
 	pterm.Success.Printf("Pull Request Url: %s\n", url)
+
+	// Try to match against a pr item number, and if so then append.
+	// If not, bypass the entire process of trying to link to work-items.
+	reg := regexp.MustCompile(`\d{5,7}`)
+	if reg.MatchString(workitems) {
+		associateWorkItemIDargs := []string{
+			"repos", "pr", "work-item", "add",
+			"--id", fmt.Sprintf("%d", prResponse.PullRequestID),
+			"--work-items",
+		}
+
+		pterm.Success.Printf("Work Item IDs: %s\n", workitems)
+		// Argument escaping seems to have issues with spaces in string
+		// This as a workaround to turn the space delimited string into each being an individual argument to pass to command processor.
+		itemIDs := strings.Split(workitems, " ")
+		associateWorkItemIDargs = append(associateWorkItemIDargs, itemIDs...)
+
+		if err := sh.Run("az", associateWorkItemIDargs...); err != nil {
+			pterm.Error.Printf("failure associating work-items via az-cli:\n%v\n\n", err)
+			os.Exit(0)
+		}
+	} else {
+		pterm.Info.Println("no work items to associate")
+	}
+
+	_ = pterm.DefaultBigText.WithLetters(pterm.NewLettersFromString("CELEBRATE")).Render()
+	if os.Getenv("NO_CONFETTI") == "1" {
+		pterm.Debug.Printfln("no fun, no confetty, exiting")
+		os.Exit(0)
+	}
+
+	time.Sleep(1 * time.Second)
+	model := confetti.InitialModel()
+	_, err = tea.NewProgram(model, tea.WithAltScreen()).Run()
+	if err != nil {
+		pterm.Warning.Printfln("non-critical celebration ended too early. Complain on github: %s", err)
+		return
+	}
 }
 
 type errMsg error

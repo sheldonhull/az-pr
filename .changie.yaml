@@ -9,15 +9,24 @@ versionFormat: '## {{.Version}} - {{.Time.Format "2006-01-02"}}'
 kindFormat: '### {{.Kind}}'
 changeFormat: '- {{ .Body -}}'
 kinds:
-  - label: 🤖 CI
-  - label: 🤖 Development
+  - label: 🤖 CI & Build
+    auto: patch
   - label: 🎉 Feature
-  - label: 🔨 Refactor
+    auto: minor
   - label: ⬇️ Deprecated
+    auto: minor
+  - label: 🔨 Refactor
+    auto: patch
   - label: 🐛 Bug Fix
+    auto: patch
   - label: 🔥 Breaking Change
+    auto: minor
   - label: 🔒 Security
+    auto: patch
   - label: ⬆️ Dependencies
+    auto: patch
+  - label: 🔥 Major Version Change (Breaking Changes)
+    auto: major
 newlines:
   afterChange: 0
   afterChangelogHeader: 1

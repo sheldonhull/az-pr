@@ -11,6 +11,7 @@ require (
 	github.com/elewis787/boa v0.1.1
 	github.com/go-git/go-git/v5 v5.5.2
 	github.com/ivanpirog/coloredcobra v1.0.1
+	github.com/maaslalani/confetty v0.0.0-20221105190856-6c6f1b5b605f
 	github.com/magefile/mage v1.14.0
 	github.com/pterm/pterm v0.12.54
 	github.com/sheldonhull/magetools v1.0.0
@@ -26,6 +27,7 @@ require (
 	github.com/acomagu/bufpipe v1.0.3 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52 v1.2.1 // indirect
+	github.com/charmbracelet/harmonica v0.2.0 // indirect
 	github.com/cloudflare/circl v1.1.0 // indirect
 	github.com/containerd/console v1.0.3 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
