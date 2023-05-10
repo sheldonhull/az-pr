@@ -4,8 +4,8 @@ package cmd
 import (
 	"os"
 
-	"github.com/charmbracelet/lipgloss"
-	"github.com/elewis787/boa"
+	shell "github.com/brianstrauch/cobra-shell"
+	"github.com/c-bata/go-prompt"
 	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -15,7 +15,17 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "az-pr",
 	Short: "Create pull requests with the azure-cli.",
+	Run: func(cmd *cobra.Command, args []string) {
+		pterm.DefaultHeader.Println("az-pr")
+		pterm.Info.Printfln("version: %s", version)
+		pterm.Info.Println("press ctrl+d to exit")
+		shell := shell.New(cmd, nil)
 
+		err := shell.Execute()
+		if err != nil {
+			pterm.Error.Println(err)
+		}
+	},
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
@@ -32,16 +42,22 @@ func Execute() {
 		ExecName: cc.Bold,
 		Flags:    cc.Bold,
 	})
-	styles := boa.DefaultStyles()
-	styles.Title.BorderForeground(lipgloss.AdaptiveColor{Light: `#E3BD2D`, Dark: `#E3BD2D`})
-	styles.Border.BorderForeground(lipgloss.AdaptiveColor{Light: `#E3BD2D`, Dark: `#E3BD2D`})
-	styles.SelectedItem.Foreground(lipgloss.AdaptiveColor{Light: `#353C3B`, Dark: `#353C3B`}).
-		Background(lipgloss.AdaptiveColor{Light: `#E3BD2D`, Dark: `#E3BD2D`})
+	rootCmd.AddCommand(confettiCmd)
+	confettiCmd.Flags().BoolVarP(&fireworks, "fireworks", "", false, "enable fireworks mode")
 
-	b := boa.New(boa.WithStyles(styles))
-
-	rootCmd.SetUsageFunc(b.UsageFunc)
-	rootCmd.SetHelpFunc(b.HelpFunc)
+	// finally register interactive
+	rootCmd.AddCommand(shell.New(
+		rootCmd,
+		nil,
+		// testcmd,
+		prompt.OptionTitle("tada"),
+		prompt.OptionPrefix(">>> "),
+		prompt.OptionShowCompletionAtStart(),
+		prompt.OptionMaxSuggestion(10), //nolint:gomnd // ok to leave this here
+		prompt.OptionInputTextColor(prompt.Yellow),
+		prompt.OptionCompletionOnDown(),
+		prompt.OptionCompletionWordSeparator(""),
+	))
 
 	err := rootCmd.Execute()
 	if err != nil {
