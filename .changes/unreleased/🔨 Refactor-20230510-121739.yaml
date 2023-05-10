@@ -1,4 +1,0 @@
-kind: "\U0001F528 Refactor"
-body: Remove embedded bubbletea confetti call and just use the great `confetty` github
-  project cli directly.
-time: 2023-05-10T12:17:39.899087-05:00
