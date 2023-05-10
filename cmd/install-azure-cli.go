@@ -47,7 +47,7 @@ func installAzureCLI() {
 	// check for az command to be found and not error
 	binary, err := exec.LookPath("az")
 	if err == nil {
-		pterm.Info.Println("az already installed, found: %q", binary)
+		pterm.Info.Printfln("az already installed, found: %q", binary)
 		return
 	}
 
