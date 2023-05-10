@@ -13,7 +13,7 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/maaslalani/confetty/confetti"
+
 	"github.com/magefile/mage/sh"
 
 	"github.com/go-git/go-git/v5"
@@ -361,4 +361,65 @@ func createPR() {
 	}
 
 	time.Sleep(1 * time.Second)
+}
+
+type (
+	errMsg error
+	model  struct {
+		textarea textarea.Model
+		err      error
+	}
+)
+
+func initialModel() model {
+	ti := textarea.New()
+	ti.Placeholder = "- Implement tacos in app..."
+	ti.Focus()
+	return model{
+		textarea: ti,
+		err:      nil,
+	}
+}
+
+func (m model) Init() tea.Cmd {
+	return textarea.Blink
+}
+
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmds []tea.Cmd
+	var cmd tea.Cmd
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.Type {
+		case tea.KeyEsc:
+			if m.textarea.Focused() {
+				m.textarea.Blur()
+			}
+		case tea.KeyCtrlC:
+			pterm.Warning.Println("ctrl+c pressed. exiting... make up your mind please")
+			os.Exit(0)
+		case tea.KeyCtrlD:
+			return m, tea.Quit
+		default:
+			if !m.textarea.Focused() {
+				cmd = m.textarea.Focus()
+				cmds = append(cmds, cmd)
+			}
+		}
+	// We handle errors just like any other message
+	case errMsg:
+		m.err = msg
+		return m, nil
+	}
+	m.textarea, cmd = m.textarea.Update(msg)
+	cmds = append(cmds, cmd)
+	return m, tea.Batch(cmds...)
+}
+
+func (m model) View() string {
+	return fmt.Sprintf(
+		"Summary of changes and why?\n\n%s\n\n%s",
+		m.textarea.View(),
+		"(ctrl+d to save, ctrl+c to quit)",
+	) + "\n\n"
 }
