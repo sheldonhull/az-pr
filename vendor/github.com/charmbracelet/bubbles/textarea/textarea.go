@@ -21,8 +21,8 @@ const (
 	defaultHeight    = 6
 	defaultWidth     = 40
 	defaultCharLimit = 400
-	maxHeight        = 99
-	maxWidth         = 500
+	defaultMaxHeight = 99
+	defaultMaxWidth  = 500
 )
 
 // Internal messages for clipboard operations.
@@ -174,6 +174,14 @@ type Model struct {
 	// accept. If 0 or less, there's no limit.
 	CharLimit int
 
+	// MaxHeight is the maximum height of the text area in rows. If 0 or less,
+	// there's no limit.
+	MaxHeight int
+
+	// MaxWidth is the maximum width of the text area in columns. If 0 or less,
+	// there's no limit.
+	MaxWidth int
+
 	// If promptFunc is set, it replaces Prompt as a generator for
 	// prompt strings at the beginning of each line.
 	promptFunc func(line int) string
@@ -228,6 +236,8 @@ func New() Model {
 
 	m := Model{
 		CharLimit:            defaultCharLimit,
+		MaxHeight:            defaultMaxHeight,
+		MaxWidth:             defaultMaxWidth,
 		Prompt:               lipgloss.ThickBorder().Left + " ",
 		style:                &blurredStyle,
 		FocusedStyle:         focusedStyle,
@@ -237,7 +247,7 @@ func New() Model {
 		Cursor:               cur,
 		KeyMap:               DefaultKeyMap,
 
-		value:            make([][]rune, minHeight, maxHeight),
+		value:            make([][]rune, minHeight, defaultMaxHeight),
 		focus:            false,
 		col:              0,
 		row:              0,
@@ -321,19 +331,23 @@ func (m *Model) insertRunesFromUserInput(runes []rune) {
 	lstart := 0
 	for i := 0; i < len(runes); i++ {
 		if runes[i] == '\n' {
-			lines = append(lines, runes[lstart:i])
+			// Queue a line to become a new row in the text area below.
+			// Beware to clamp the max capacity of the slice, to ensure no
+			// data from different rows get overwritten when later edits
+			// will modify this line.
+			lines = append(lines, runes[lstart:i:i])
 			lstart = i + 1
 		}
 	}
-	if lstart < len(runes) {
+	if lstart <= len(runes) {
 		// The last line did not end with a newline character.
 		// Take it now.
 		lines = append(lines, runes[lstart:])
 	}
 
 	// Obey the maximum height limit.
-	if len(m.value)+len(lines)-1 > maxHeight {
-		allowedHeight := max(0, maxHeight-len(m.value)+1)
+	if m.MaxHeight > 0 && len(m.value)+len(lines)-1 > m.MaxHeight {
+		allowedHeight := max(0, m.MaxHeight-len(m.value)+1)
 		lines = lines[:allowedHeight]
 	}
 
@@ -342,7 +356,7 @@ func (m *Model) insertRunesFromUserInput(runes []rune) {
 		return
 	}
 
-	// Save the reminder of the original line at the current
+	// Save the remainder of the original line at the current
 	// cursor position.
 	tail := make([]rune, len(m.value[m.row][m.col:]))
 	copy(tail, m.value[m.row][m.col:])
@@ -427,7 +441,7 @@ func (m *Model) CursorDown() {
 		m.row++
 		m.col = 0
 	} else {
-		// Move the cursor to the start of the next line. So that we can get
+		// Move the cursor to the start of the next line so that we can get
 		// the line information. We need to add 2 columns to account for the
 		// trailing space wrapping.
 		m.col = min(li.StartColumn+li.Width+2, len(m.value[m.row])-1)
@@ -516,7 +530,7 @@ func (m *Model) Focus() tea.Cmd {
 	return m.Cursor.Focus()
 }
 
-// Blur removes the focus state on the model.  When the model is blurred it can
+// Blur removes the focus state on the model. When the model is blurred it can
 // not receive keyboard input and the cursor will be hidden.
 func (m *Model) Blur() {
 	m.focus = false
@@ -526,14 +540,18 @@ func (m *Model) Blur() {
 
 // Reset sets the input to its default state with no input.
 func (m *Model) Reset() {
-	m.value = make([][]rune, minHeight, maxHeight)
+	startCap := m.MaxHeight
+	if startCap <= 0 {
+		startCap = defaultMaxHeight
+	}
+	m.value = make([][]rune, minHeight, startCap)
 	m.col = 0
 	m.row = 0
 	m.viewport.GotoTop()
 	m.SetCursor(0)
 }
 
-// rsan initializes or retrieves the rune sanitizer.
+// san initializes or retrieves the rune sanitizer.
 func (m *Model) san() runeutil.Sanitizer {
 	if m.rsan == nil {
 		// Textinput has all its input on a single line so collapse
@@ -623,14 +641,10 @@ func (m *Model) deleteWordRight() {
 	}
 
 	oldCol := m.col
-	m.SetCursor(m.col + 1)
-	for unicode.IsSpace(m.value[m.row][m.col]) {
+
+	for m.col < len(m.value[m.row]) && unicode.IsSpace(m.value[m.row][m.col]) {
 		// ignore series of whitespace after cursor
 		m.SetCursor(m.col + 1)
-
-		if m.col >= len(m.value[m.row]) {
-			break
-		}
 	}
 
 	for m.col < len(m.value[m.row]) {
@@ -827,12 +841,16 @@ func (m *Model) moveToEnd() {
 // whether or not line numbers are being shown.
 //
 // Ensure that SetWidth is called after setting the Prompt and ShowLineNumbers,
-// If it important that the width of the textarea be exactly the given width
+// It is important that the width of the textarea be exactly the given width
 // and no more.
 func (m *Model) SetWidth(w int) {
-	m.viewport.Width = clamp(w, minWidth, maxWidth)
+	if m.MaxWidth > 0 {
+		m.viewport.Width = clamp(w, minWidth, m.MaxWidth)
+	} else {
+		m.viewport.Width = max(w, minWidth)
+	}
 
-	// Since the width of the textarea input is dependant on the width of the
+	// Since the width of the textarea input is dependent on the width of the
 	// prompt and line numbers, we need to calculate it by subtracting.
 	inputWidth := w
 	if m.ShowLineNumbers {
@@ -847,7 +865,11 @@ func (m *Model) SetWidth(w int) {
 	}
 
 	inputWidth -= m.promptWidth
-	m.width = clamp(inputWidth, minWidth, maxWidth)
+	if m.MaxWidth > 0 {
+		m.width = clamp(inputWidth, minWidth, m.MaxWidth)
+	} else {
+		m.width = max(inputWidth, minWidth)
+	}
 }
 
 // SetPromptFunc supersedes the Prompt field and sets a dynamic prompt
@@ -869,8 +891,13 @@ func (m Model) Height() int {
 
 // SetHeight sets the height of the textarea.
 func (m *Model) SetHeight(h int) {
-	m.height = clamp(h, minHeight, maxHeight)
-	m.viewport.Height = clamp(h, minHeight, maxHeight)
+	if m.MaxHeight > 0 {
+		m.height = clamp(h, minHeight, m.MaxHeight)
+		m.viewport.Height = clamp(h, minHeight, m.MaxHeight)
+	} else {
+		m.height = max(h, minHeight)
+		m.viewport.Height = max(h, minHeight)
+	}
 }
 
 // Update is the Bubble Tea update loop.
@@ -940,7 +967,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 			}
 			m.deleteWordRight()
 		case key.Matches(msg, m.KeyMap.InsertNewline):
-			if len(m.value) >= maxHeight {
+			if m.MaxHeight > 0 && len(m.value) >= m.MaxHeight {
 				return m, nil
 			}
 			m.col = clamp(m.col, 0, len(m.value[m.row]))
@@ -993,7 +1020,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 	newRow, newCol := m.cursorLineNumber(), m.col
 	m.Cursor, cmd = m.Cursor.Update(msg)
-	if newRow != oldRow || newCol != oldCol {
+	if (newRow != oldRow || newCol != oldCol) && m.Cursor.Mode() == cursor.CursorBlink {
 		m.Cursor.Blink = false
 		cmd = m.Cursor.BlinkCmd()
 	}
@@ -1167,7 +1194,7 @@ func (m Model) cursorLineNumber() int {
 	return line
 }
 
-// mergeLineBelow merges the current line with the line below.
+// mergeLineBelow merges the current line the cursor is on with the line below.
 func (m *Model) mergeLineBelow(row int) {
 	if row >= len(m.value)-1 {
 		return
