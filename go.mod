@@ -12,8 +12,8 @@ require (
 	github.com/go-git/go-git/v5 v5.7.0
 	github.com/ivanpirog/coloredcobra v1.0.1
 	github.com/magefile/mage v1.15.0
-	github.com/pterm/pterm v0.12.61
-	github.com/sheldonhull/magetools v1.0.0
+	github.com/pterm/pterm v0.12.62
+	github.com/sheldonhull/magetools v1.0.1
 	github.com/spf13/cobra v1.7.0
 )
 
@@ -44,8 +44,7 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
-	github.com/lithammer/fuzzysearch v1.1.7 // indirect
-	github.com/logrusorgru/aurora v2.0.3+incompatible // indirect
+	github.com/lithammer/fuzzysearch v1.1.8 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
@@ -65,7 +64,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
-	github.com/ztrue/tracerr v0.3.0 // indirect
+	github.com/ztrue/tracerr v0.4.0 // indirect
 	golang.org/x/crypto v0.9.0 // indirect
 	golang.org/x/mod v0.10.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
