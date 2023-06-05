@@ -63,8 +63,8 @@ github.com/c-bata/go-prompt/internal/bisect
 github.com/c-bata/go-prompt/internal/debug
 github.com/c-bata/go-prompt/internal/strings
 github.com/c-bata/go-prompt/internal/term
-# github.com/charmbracelet/bubbles v0.15.0
-## explicit; go 1.13
+# github.com/charmbracelet/bubbles v0.16.1
+## explicit; go 1.17
 github.com/charmbracelet/bubbles/cursor
 github.com/charmbracelet/bubbles/key
 github.com/charmbracelet/bubbles/runeutil
