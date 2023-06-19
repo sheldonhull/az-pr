@@ -9,7 +9,7 @@ atomicgo.dev/keyboard/keys
 # atomicgo.dev/schedule v0.0.2
 ## explicit; go 1.18
 atomicgo.dev/schedule
-# github.com/AlecAivazis/survey/v2 v2.3.6
+# github.com/AlecAivazis/survey/v2 v2.3.7
 ## explicit; go 1.13
 github.com/AlecAivazis/survey/v2
 github.com/AlecAivazis/survey/v2/core
