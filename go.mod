@@ -3,7 +3,7 @@ module github.com/sheldonhull/az-pr
 go 1.19
 
 require (
-	github.com/AlecAivazis/survey/v2 v2.3.6
+	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/bitfield/script v0.22.0
 	github.com/brianstrauch/cobra-shell v0.4.0
 	github.com/c-bata/go-prompt v0.2.6
