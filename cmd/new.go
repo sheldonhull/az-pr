@@ -303,7 +303,7 @@ func detectSSH() bool {
 	}
 }
 
-func createPR() { //nolint:funlen // this is a cli tool, not a library, ok with longer workflow command
+func createPR() { //nolint:funlen,cyclop // this is a cli tool, not a library, ok with longer workflow command
 	if Debug {
 		pterm.EnableDebugMessages()
 	}
