@@ -27,3 +27,10 @@ actions:
     - trunk-check-pre-push
     - trunk-fmt-pre-commit
     - trunk-upgrade-available
+  definitions:
+    - description: go-generate
+      id: go-generate
+      runtime: go
+      run: go generate ./...
+      triggers:
+        - files: [CHANGELOG.md]

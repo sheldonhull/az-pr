@@ -1,0 +1,6 @@
+kind: "\U0001F389 Feature"
+body: |-
+  When using SSH, a target branch can't be automatically detected for the pull request creation.
+  This will automatically evaluate for `main/master` and set for SSH as before. However, now when using https type clones, the target branch isn't set by default, which will create the pull request targeted at the default upstream branch.
+  Eliminates any issues with repos that don't use `main` as convention (for example `dev/develop/trunk` as the main development branch).
+time: 2023-07-08T14:31:58.25338846-05:00

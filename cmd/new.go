@@ -13,6 +13,7 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/transport"
 
 	"github.com/magefile/mage/sh"
 
@@ -270,14 +271,49 @@ func getUpstreamBranch() (branchName string, err error) {
 	return branchName, err
 }
 
+func detectSSH() bool {
+	// Open the repository
+	repo, err := git.PlainOpenWithOptions(".", &git.PlainOpenOptions{DetectDotGit: true})
+	if err != nil {
+		pterm.Error.Printfln("error opening repository: %v", err)
+		os.Exit(1)
+	}
+
+	// Get the URL of the remote
+	remote, err := repo.Remote("origin")
+	if err != nil {
+		pterm.Error.Printfln("error getting remote: %v", err)
+		os.Exit(1)
+	}
+	url := remote.Config().URLs[0]
+
+	// Check if the URL is an ssh URL
+	_, err = transport.NewEndpoint(url)
+	if err != nil {
+		pterm.Debug.Println("The remote was cloned via https")
+		return false
+	} else {
+		pterm.Debug.Println("The remote was cloned via ssh")
+		return true
+	}
+}
+
 func createPR() {
 	if Debug {
 		pterm.EnableDebugMessages()
 	}
-	branchName, err := getUpstreamBranch()
-	if err != nil {
-		pterm.Error.Printfln("createPR: %v", err)
-		os.Exit(1)
+	var branchName string
+	var err error
+	isSSH := detectSSH()
+
+	// NOTE: can't use autodetect with ssh so have to be specific:
+	// Per error: DevOps SSH URLs are not supported for repo auto-detection yet. https://github.com/Microsoft/azure-devops-cli-extension/issues/142
+	// Attempt to calculate for user based on main/master pattern.
+	if isSSH {
+		branchName, err = getUpstreamBranch()
+		if err != nil {
+			pterm.Warning.Printfln("isSSH check for getUpstreamBranch: %v", err)
+		}
 	}
 
 	title, description, workitems, draft := gatherInput()
@@ -291,9 +327,21 @@ func createPR() {
 		"--squash",
 		"--transition-work-items", "true",
 		"--open",
-		"--target-branch", branchName, // can't use autodetect with ssh so have to be specific: Per error: DevOps SSH URLs are not supported for repo auto-detection yet. https://github.com/Microsoft/azure-devops-cli-extension/issues/142
-		"--description", description,
 	}
+
+	if isSSH && branchName != "" {
+		pterm.Debug.Printfln("isSSH && branchName is: %s", branchName)
+		args = append(args, "--target-branch")
+		args = append(args, branchName)
+	} else {
+		pterm.Debug.Println("target-branch is not set so default branch set in Azure Repos will be used")
+		args = append(args, "--detect")
+
+	}
+
+	args = append(args, "--description")
+	args = append(args, description)
+
 	pterm.Debug.Printfln("args: %v", args)
 	// Repository contains the response URL for the PR
 	type Repository struct {
