@@ -1,0 +1,7 @@
+kind: "\U0001F389 Feature"
+body: |
+  Occasionally tools like this run into issues... obviously not my code... \U0001F440\n\nWhen
+  working through those, I'd have to keep rerunning the PR process.\nThis now outputs
+  the escaped shell command that should reasonably work on windows/linux/mac on error
+  (or debug).\n\nShould be a good quality of life for anyone using and running into a failure.
+time: 2023-07-08T15:26:36.280328952-05:00

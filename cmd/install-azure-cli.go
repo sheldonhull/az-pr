@@ -44,6 +44,9 @@ func init() {
 }
 
 func installAzureCLI() {
+	if Debug {
+		pterm.EnableDebugMessages()
+	}
 	// check for az command to be found and not error
 	binary, err := exec.LookPath("az")
 	if err == nil {
@@ -64,11 +67,17 @@ func installAzureCLI() {
 }
 
 func installAzureCLIMacOS() {
+	if Debug {
+		pterm.EnableDebugMessages()
+	}
 	pterm.DefaultSection.Printfln("installing azure-cli via brew")
 	_, _ = script.Exec("brew install azure-cli").Stdout()
 }
 
 func installAzureCLILinux() {
+	if Debug {
+		pterm.EnableDebugMessages()
+	}
 	pterm.Info.Println("not using apt-install as it can be very out of date")
 	var response bool
 	qs := &survey.Confirm{
@@ -104,6 +113,9 @@ func installAzureCLILinux() {
 }
 
 func installAzureCLIWindows() {
+	if Debug {
+		pterm.EnableDebugMessages()
+	}
 	installType, _ := pterm.DefaultInteractiveSelect.
 		WithOptions([]string{"scoop", "choco", "winget"}).
 		Show()

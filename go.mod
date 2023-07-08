@@ -4,12 +4,14 @@ go 1.19
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
+	github.com/alessio/shellescape v1.4.1
 	github.com/bitfield/script v0.22.0
 	github.com/brianstrauch/cobra-shell v0.4.0
 	github.com/c-bata/go-prompt v0.2.6
 	github.com/charmbracelet/bubbles v0.16.1
 	github.com/charmbracelet/bubbletea v0.24.2
 	github.com/go-git/go-git/v5 v5.7.0
+	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
 	github.com/ivanpirog/coloredcobra v1.0.1
 	github.com/magefile/mage v1.15.0
 	github.com/pterm/pterm v0.12.62

@@ -41,6 +41,9 @@ func init() {
 }
 
 func check() {
+	if Debug {
+		pterm.EnableDebugMessages()
+	}
 	failureCount := 0
 	report := pterm.TableData{
 		[]string{"Status", "Check", "Value", "Notes"},
@@ -77,6 +80,9 @@ func check() {
 
 // checkAzureCLI checks if Azure CLI is installed.
 func checkAzureCLI() ([]string, error) {
+	if Debug {
+		pterm.EnableDebugMessages()
+	}
 	_, err := exec.LookPath("az")
 	if err != nil {
 		// pterm.Error.Println("🧪 Azure CLI is not installed.\n" +
@@ -89,6 +95,9 @@ func checkAzureCLI() ([]string, error) {
 
 // checkAzEnv checks if AZURE_DEVOPS_EXT_PAT is set as env variable which is required for the Azure CLI to function.
 func checkAzEnv() ([]string, error) {
+	if Debug {
+		pterm.EnableDebugMessages()
+	}
 	_, ok := os.LookupEnv("AZURE_DEVOPS_EXT_PAT")
 	if !ok || os.Getenv("AZURE_DEVOPS_EXT_PAT") == "" {
 		// pterm.Error.Println("🧪 AZURE_DEVOPS_EXT_PAT is not set as env variable.\n" +

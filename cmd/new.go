@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/alessio/shellescape"
+
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport"
@@ -272,6 +274,9 @@ func getUpstreamBranch() (branchName string, err error) {
 }
 
 func detectSSH() bool {
+	if Debug {
+		pterm.EnableDebugMessages()
+	}
 	// Open the repository
 	repo, err := git.PlainOpenWithOptions(".", &git.PlainOpenOptions{DetectDotGit: true})
 	if err != nil {
@@ -298,7 +303,7 @@ func detectSSH() bool {
 	}
 }
 
-func createPR() {
+func createPR() { //nolint:funlen // this is a cli tool, not a library, ok with longer workflow command
 	if Debug {
 		pterm.EnableDebugMessages()
 	}
@@ -336,13 +341,11 @@ func createPR() {
 	} else {
 		pterm.Debug.Println("target-branch is not set so default branch set in Azure Repos will be used")
 		args = append(args, "--detect")
-
 	}
 
 	args = append(args, "--description")
 	args = append(args, description)
 
-	pterm.Debug.Printfln("args: %v", args)
 	// Repository contains the response URL for the PR
 	type Repository struct {
 		WebURL string `json:"webUrl"` //nolint:tagliatelle // this is output from azure-cli I don't control
@@ -355,12 +358,15 @@ func createPR() {
 
 	cmd := exec.Command("az", args...)
 
-	pterm.Debug.Printfln("az %s", cmd.String())
+	pterm.Debug.Printfln("az %s", shellescape.QuoteCommand(args))
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		pterm.Error.Printf("failure running azure-cli via az-cli:\n%v\n\n", err)
 		pterm.Error.Printfln("out: %s", out)
 		pterm.Error.Printfln("err: %v", err)
+
+		pterm.Info.Println("try again by rerunning this generated command")
+		pterm.Info.Println("az " + shellescape.QuoteCommand(args))
 		os.Exit(1)
 	}
 	prResponse := PullRequestResponse{}
@@ -393,9 +399,11 @@ func createPR() {
 		// This as a workaround to turn the space delimited string into each being an individual argument to pass to command processor.
 		itemIDs := strings.Split(workitems, " ")
 		associateWorkItemIDargs = append(associateWorkItemIDargs, itemIDs...)
+		pterm.Info.Println("az " + shellescape.QuoteCommand(associateWorkItemIDargs))
 
 		if err := sh.Run("az", associateWorkItemIDargs...); err != nil {
 			pterm.Error.Printf("failure associating work-items via az-cli:\n%v\n\n", err)
+
 			os.Exit(0)
 		}
 	} else {

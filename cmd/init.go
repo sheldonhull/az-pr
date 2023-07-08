@@ -32,6 +32,9 @@ func init() {
 }
 
 func setup() {
+	if Debug {
+		pterm.EnableDebugMessages()
+	}
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

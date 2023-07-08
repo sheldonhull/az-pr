@@ -11,6 +11,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var Debug bool
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "az-pr",
@@ -24,6 +26,13 @@ var rootCmd = &cobra.Command{
 		err := shell.Execute()
 		if err != nil {
 			pterm.Error.Println(err)
+		}
+	},
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		debug, _ := cmd.Flags().GetBool("debug")
+		if debug || os.Getenv("DEBUG") != "" {
+			pterm.EnableDebugMessages()
+			pterm.Debug.Println("debug mode enabled")
 		}
 	},
 	// Uncomment the following line if your bare application
@@ -58,6 +67,10 @@ func Execute() {
 		prompt.OptionCompletionOnDown(),
 		prompt.OptionCompletionWordSeparator(""),
 	))
+	rootCmd.PersistentFlags().BoolVarP(&Debug, "debug", "d", false, "enable debug output (or use DEBUG=1)")
+	// Cobra also supports local flags, which will only run
+	// when this action is called directly.
+	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	err := rootCmd.Execute()
 	if err != nil {
@@ -65,20 +78,18 @@ func Execute() {
 	}
 }
 
-var Debug bool
+// func init() {
+// Here you will define your flags and configuration settings.
+// Cobra supports persistent flags, which, if defined here,
+// will be global for your application.
 
-func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.az-pr.yaml)")
-	rootCmd.PersistentFlags().BoolVar(&Debug, "debug", false, "enable debug output")
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	if Debug {
-		pterm.EnableDebugMessages()
-	}
-	// rootCmd.Flags().BoolP("debug", "d", false, "Enable debug logging")
-}
+// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.az-pr.yaml)")
+// rootCmd.PersistentFlags().BoolVar(&Debug, "debug", false, "enable debug output (or use DEBUG=1)")
+// // Cobra also supports local flags, which will only run
+// // when this action is called directly.
+// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+// if Debug || os.Getenv("DEBUG") != "" {
+// 	pterm.EnableDebugMessages()
+// }
+// rootCmd.Flags().BoolP("debug", "d", false, "Enable debug logging")
+// }

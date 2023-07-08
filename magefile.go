@@ -8,7 +8,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/hako/durafmt"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 	"github.com/pterm/pterm"
@@ -110,4 +112,18 @@ func getVersion() (releaseVersion, cleanPath string, err error) {
 		cleanPath = filepath.Join(os.Getenv("GITHUB_WORKSPACE"), ".changes", cleanVersion+".md")
 	}
 	return cleanVersion, cleanPath, nil
+}
+
+// ⚙ Run builds the binary into the local artifact direction and launches for testing.
+func Run() error {
+	start := time.Now()
+	defer func() {
+		duration := durafmt.Parse(time.Since(start))
+		pterm.Success.Printfln("✅ Run() took %s", duration)
+	}()
+	targetBuildFile := filepath.Join(artifactDirectory, "az-pr")
+	if err := sh.RunV("go", "build", "-o", targetBuildFile, "main.go"); err != nil {
+		return err
+	}
+	return sh.RunV(targetBuildFile, "shell", "--debug")
 }
