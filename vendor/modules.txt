@@ -9,6 +9,9 @@ atomicgo.dev/keyboard/keys
 # atomicgo.dev/schedule v0.0.2
 ## explicit; go 1.18
 atomicgo.dev/schedule
+# dario.cat/mergo v1.0.0
+## explicit; go 1.13
+dario.cat/mergo
 # github.com/AlecAivazis/survey/v2 v2.3.7
 ## explicit; go 1.13
 github.com/AlecAivazis/survey/v2
@@ -21,7 +24,7 @@ github.com/Microsoft/go-winio/internal/fs
 github.com/Microsoft/go-winio/internal/socket
 github.com/Microsoft/go-winio/internal/stringbuffer
 github.com/Microsoft/go-winio/pkg/guid
-# github.com/ProtonMail/go-crypto v0.0.0-20230518184743-7afd39499903
+# github.com/ProtonMail/go-crypto v0.0.0-20230717121422-5aa5874ade95
 ## explicit; go 1.13
 github.com/ProtonMail/go-crypto/bitcurves
 github.com/ProtonMail/go-crypto/brainpool
@@ -124,7 +127,7 @@ github.com/go-git/go-billy/v5/helper/polyfill
 github.com/go-git/go-billy/v5/memfs
 github.com/go-git/go-billy/v5/osfs
 github.com/go-git/go-billy/v5/util
-# github.com/go-git/go-git/v5 v5.8.0
+# github.com/go-git/go-git/v5 v5.8.1
 ## explicit; go 1.18
 github.com/go-git/go-git/v5
 github.com/go-git/go-git/v5/config
@@ -183,9 +186,6 @@ github.com/gookit/color
 # github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
 ## explicit; go 1.11
 github.com/hako/durafmt
-# github.com/imdario/mergo v0.3.15
-## explicit; go 1.13
-github.com/imdario/mergo
 # github.com/inconshreveable/mousetrap v1.1.0
 ## explicit; go 1.18
 github.com/inconshreveable/mousetrap
@@ -278,7 +278,7 @@ github.com/sheldonhull/magetools/gotools
 github.com/sheldonhull/magetools/pkg/magetoolsutils
 github.com/sheldonhull/magetools/pkg/req
 github.com/sheldonhull/magetools/tooling
-# github.com/skeema/knownhosts v1.1.1
+# github.com/skeema/knownhosts v1.2.0
 ## explicit; go 1.17
 github.com/skeema/knownhosts
 # github.com/spf13/cobra v1.7.0
@@ -296,7 +296,7 @@ github.com/xo/terminfo
 # github.com/ztrue/tracerr v0.4.0
 ## explicit
 github.com/ztrue/tracerr
-# golang.org/x/crypto v0.9.0
+# golang.org/x/crypto v0.11.0
 ## explicit; go 1.17
 golang.org/x/crypto/argon2
 golang.org/x/crypto/blake2b
@@ -320,7 +320,7 @@ golang.org/x/mod/internal/lazyregexp
 golang.org/x/mod/modfile
 golang.org/x/mod/module
 golang.org/x/mod/semver
-# golang.org/x/net v0.10.0
+# golang.org/x/net v0.12.0
 ## explicit; go 1.17
 golang.org/x/net/context
 golang.org/x/net/internal/socks
