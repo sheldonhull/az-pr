@@ -1,11 +1,12 @@
 # AZ-PR
 
-[![forthebadge](https://forthebadge.com/images/badges/0-percent-optimized.svg)](https://forthebadge.com)
-[![forthebadge](https://forthebadge.com/images/badges/contains-tasty-spaghetti-code.svg)](https://forthebadge.com)
-[![forthebadge](https://forthebadge.com/images/badges/not-a-bug-a-feature.svg)](https://forthebadge.com)
-[![forthebadge](https://forthebadge.com/images/badges/uses-badges.svg)](https://forthebadge.com)
-[![forthebadge](https://forthebadge.com/images/badges/works-on-my-machine.svg)](https://forthebadge.com)
-[![forthebadge](https://forthebadge.com/images/badges/you-didnt-ask-for-this.svg)](https://forthebadge.com)
+
+[![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/0-percent-optimized.svg))]()
+[![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/contains-tasty-spaghetti-code.svg)]()
+[![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/not-a-bug-a-feature.svg)]()
+[![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/uses-badges.svg)]()
+[![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/works-on-my-machine.svg)]()
+[![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/you-didnt-ask-for-this.svg)]()
 
 A go cli app which wraps up the azure-cli for simplifying setup and creation of azure-devops repos pull requests without having to resort to the web ui.
 
