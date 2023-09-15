@@ -1,0 +1,5 @@
+kind: "\U0001F528 Refactor"
+body:
+  Adjust the sort order to more commonly chosen values to the commit type top
+  of the list.
+time: 2023-09-15T14:33:48.402976-05:00

@@ -60,16 +60,16 @@ func init() {
 var (
 	// _conventionalCommitTypes is a collection of conventional commit types for PR creation.
 	_conventionalCommitTypes = []string{
-		"feat",
-		"fix",
-		"chore",
-		"refactor",
-		"test",
-		"docs",
-		"style",
-		"perf",
 		"ci",
 		"build",
+		"feat",
+		"fix",
+		"refactor",
+		"style",
+		"chore",
+		"test",
+		"docs",
+		"perf",
 		"revert",
 	}
 )
