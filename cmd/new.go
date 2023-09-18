@@ -332,6 +332,7 @@ func createPR() { //nolint:funlen,cyclop // this is a cli tool, not a library, o
 		"--squash",
 		"--transition-work-items", "true",
 		"--open",
+		"--merge-commit-message", title,
 	}
 
 	if isSSH && branchName != "" {
