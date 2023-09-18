@@ -1,6 +1,8 @@
 module github.com/sheldonhull/az-pr
 
-go 1.19
+go 1.21
+
+toolchain go1.21.1
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
@@ -14,7 +16,7 @@ require (
 	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
 	github.com/ivanpirog/coloredcobra v1.0.1
 	github.com/magefile/mage v1.15.0
-	github.com/pterm/pterm v0.12.67
+	github.com/pterm/pterm v0.12.69
 	github.com/sheldonhull/magetools v1.0.1
 	github.com/spf13/cobra v1.7.0
 )
