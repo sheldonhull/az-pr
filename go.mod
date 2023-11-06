@@ -16,7 +16,7 @@ require (
 	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
 	github.com/ivanpirog/coloredcobra v1.0.1
 	github.com/magefile/mage v1.15.0
-	github.com/pterm/pterm v0.12.69
+	github.com/pterm/pterm v0.12.70
 	github.com/sheldonhull/magetools v1.0.1
 	github.com/spf13/cobra v1.8.0
 )
