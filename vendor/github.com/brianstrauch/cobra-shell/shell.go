@@ -172,6 +172,8 @@ func execute(cmd *cobra.Command, args []string) error {
 			} else {
 				_ = flag.Value.Set(flag.DefValue)
 			}
+
+			_ = cmd.Flags().SetAnnotation(flag.Name, cobra.BashCompOneRequiredFlag, []string{"false"})
 		})
 
 		cmd.InitDefaultHelpFlag()
@@ -205,15 +207,30 @@ func parseSuggestions(out string) []prompt.Suggest {
 	}
 
 	sort.Slice(suggestions, func(i, j int) bool {
-		return suggestions[i].Text < suggestions[j].Text
+		it := suggestions[i].Text
+		jt := suggestions[j].Text
+
+		if isFlag(it) && isFlag(jt) {
+			return it < jt
+		}
+
+		if isFlag(it) {
+			return false
+		}
+
+		if isFlag(jt) {
+			return true
+		}
+
+		return it < jt
 	})
 
 	return suggestions
 }
 
 func escapeSpecialCharacters(val string) string {
-	for _, c := range []string{"\\", "\"", "$", "`", "!"} {
-		val = strings.ReplaceAll(val, c, "\\"+c)
+	for _, c := range []string{`\`, `"`, "$", "`", "!"} {
+		val = strings.ReplaceAll(val, c, `\`+c)
 	}
 
 	if strings.ContainsAny(val, " #&*;<>?[]|~") {
