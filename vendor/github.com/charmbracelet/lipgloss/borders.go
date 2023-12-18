@@ -11,14 +11,19 @@ import (
 // Border contains a series of values which comprise the various parts of a
 // border.
 type Border struct {
-	Top         string
-	Bottom      string
-	Left        string
-	Right       string
-	TopLeft     string
-	TopRight    string
-	BottomRight string
-	BottomLeft  string
+	Top          string
+	Bottom       string
+	Left         string
+	Right        string
+	TopLeft      string
+	TopRight     string
+	BottomLeft   string
+	BottomRight  string
+	MiddleLeft   string
+	MiddleRight  string
+	Middle       string
+	MiddleTop    string
+	MiddleBottom string
 }
 
 // GetTopSize returns the width of the top border. If borders contain runes of
@@ -32,7 +37,7 @@ func (b Border) GetTopSize() int {
 // runes of varying widths, the widest rune is returned. If no border exists on
 // the right edge, 0 is returned.
 func (b Border) GetRightSize() int {
-	return getBorderEdgeWidth(b.TopRight, b.Top, b.BottomRight)
+	return getBorderEdgeWidth(b.TopRight, b.Right, b.BottomRight)
 }
 
 // GetBottomSize returns the width of the bottom border. If borders contain
@@ -46,7 +51,7 @@ func (b Border) GetBottomSize() int {
 // of varying widths, the widest rune is returned. If no border exists on the
 // left edge, 0 is returned.
 func (b Border) GetLeftSize() int {
-	return getBorderEdgeWidth(b.TopLeft, b.Left, b.TopRight)
+	return getBorderEdgeWidth(b.TopLeft, b.Left, b.BottomLeft)
 }
 
 func getBorderEdgeWidth(borderParts ...string) (maxWidth int) {
@@ -63,25 +68,35 @@ var (
 	noBorder = Border{}
 
 	normalBorder = Border{
-		Top:         "─",
-		Bottom:      "─",
-		Left:        "│",
-		Right:       "│",
-		TopLeft:     "┌",
-		TopRight:    "┐",
-		BottomLeft:  "└",
-		BottomRight: "┘",
+		Top:          "─",
+		Bottom:       "─",
+		Left:         "│",
+		Right:        "│",
+		TopLeft:      "┌",
+		TopRight:     "┐",
+		BottomLeft:   "└",
+		BottomRight:  "┘",
+		MiddleLeft:   "├",
+		MiddleRight:  "┤",
+		Middle:       "┼",
+		MiddleTop:    "┬",
+		MiddleBottom: "┴",
 	}
 
 	roundedBorder = Border{
-		Top:         "─",
-		Bottom:      "─",
-		Left:        "│",
-		Right:       "│",
-		TopLeft:     "╭",
-		TopRight:    "╮",
-		BottomLeft:  "╰",
-		BottomRight: "╯",
+		Top:          "─",
+		Bottom:       "─",
+		Left:         "│",
+		Right:        "│",
+		TopLeft:      "╭",
+		TopRight:     "╮",
+		BottomLeft:   "╰",
+		BottomRight:  "╯",
+		MiddleLeft:   "├",
+		MiddleRight:  "┤",
+		Middle:       "┼",
+		MiddleTop:    "┬",
+		MiddleBottom: "┴",
 	}
 
 	blockBorder = Border{
@@ -118,36 +133,51 @@ var (
 	}
 
 	thickBorder = Border{
-		Top:         "━",
-		Bottom:      "━",
-		Left:        "┃",
-		Right:       "┃",
-		TopLeft:     "┏",
-		TopRight:    "┓",
-		BottomLeft:  "┗",
-		BottomRight: "┛",
+		Top:          "━",
+		Bottom:       "━",
+		Left:         "┃",
+		Right:        "┃",
+		TopLeft:      "┏",
+		TopRight:     "┓",
+		BottomLeft:   "┗",
+		BottomRight:  "┛",
+		MiddleLeft:   "┣",
+		MiddleRight:  "┫",
+		Middle:       "╋",
+		MiddleTop:    "┳",
+		MiddleBottom: "┻",
 	}
 
 	doubleBorder = Border{
-		Top:         "═",
-		Bottom:      "═",
-		Left:        "║",
-		Right:       "║",
-		TopLeft:     "╔",
-		TopRight:    "╗",
-		BottomLeft:  "╚",
-		BottomRight: "╝",
+		Top:          "═",
+		Bottom:       "═",
+		Left:         "║",
+		Right:        "║",
+		TopLeft:      "╔",
+		TopRight:     "╗",
+		BottomLeft:   "╚",
+		BottomRight:  "╝",
+		MiddleLeft:   "╠",
+		MiddleRight:  "╣",
+		Middle:       "╬",
+		MiddleTop:    "╦",
+		MiddleBottom: "╩",
 	}
 
 	hiddenBorder = Border{
-		Top:         " ",
-		Bottom:      " ",
-		Left:        " ",
-		Right:       " ",
-		TopLeft:     " ",
-		TopRight:    " ",
-		BottomLeft:  " ",
-		BottomRight: " ",
+		Top:          " ",
+		Bottom:       " ",
+		Left:         " ",
+		Right:        " ",
+		TopLeft:      " ",
+		TopRight:     " ",
+		BottomLeft:   " ",
+		BottomRight:  " ",
+		MiddleLeft:   " ",
+		MiddleRight:  " ",
+		Middle:       " ",
+		MiddleTop:    " ",
+		MiddleBottom: " ",
 	}
 )
 
