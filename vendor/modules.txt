@@ -66,17 +66,17 @@ github.com/c-bata/go-prompt/internal/bisect
 github.com/c-bata/go-prompt/internal/debug
 github.com/c-bata/go-prompt/internal/strings
 github.com/c-bata/go-prompt/internal/term
-# github.com/charmbracelet/bubbles v0.16.1
+# github.com/charmbracelet/bubbles v0.17.1
 ## explicit; go 1.17
 github.com/charmbracelet/bubbles/cursor
 github.com/charmbracelet/bubbles/key
 github.com/charmbracelet/bubbles/runeutil
 github.com/charmbracelet/bubbles/textarea
 github.com/charmbracelet/bubbles/viewport
-# github.com/charmbracelet/bubbletea v0.24.2
+# github.com/charmbracelet/bubbletea v0.25.0
 ## explicit; go 1.17
 github.com/charmbracelet/bubbletea
-# github.com/charmbracelet/lipgloss v0.7.1
+# github.com/charmbracelet/lipgloss v0.9.1
 ## explicit; go 1.17
 github.com/charmbracelet/lipgloss
 # github.com/cloudflare/circl v1.3.3
@@ -249,7 +249,7 @@ github.com/muesli/reflow/ansi
 github.com/muesli/reflow/truncate
 github.com/muesli/reflow/wordwrap
 github.com/muesli/reflow/wrap
-# github.com/muesli/termenv v0.15.1
+# github.com/muesli/termenv v0.15.2
 ## explicit; go 1.17
 github.com/muesli/termenv
 # github.com/pjbgf/sha1cd v0.3.0
