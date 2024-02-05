@@ -10,7 +10,7 @@ require (
 	github.com/bitfield/script v0.22.0
 	github.com/brianstrauch/cobra-shell v0.5.0
 	github.com/c-bata/go-prompt v0.2.6
-	github.com/charmbracelet/bubbles v0.17.1
+	github.com/charmbracelet/bubbles v0.18.0
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
@@ -62,7 +62,7 @@ require (
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
 	github.com/pkg/term v1.2.0-beta.2 // indirect
-	github.com/rivo/uniseg v0.4.4 // indirect
+	github.com/rivo/uniseg v0.4.6 // indirect
 	github.com/sergi/go-diff v1.3.1 // indirect
 	github.com/skeema/knownhosts v1.2.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect

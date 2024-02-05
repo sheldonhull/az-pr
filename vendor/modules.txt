@@ -66,12 +66,13 @@ github.com/c-bata/go-prompt/internal/bisect
 github.com/c-bata/go-prompt/internal/debug
 github.com/c-bata/go-prompt/internal/strings
 github.com/c-bata/go-prompt/internal/term
-# github.com/charmbracelet/bubbles v0.17.1
-## explicit; go 1.17
+# github.com/charmbracelet/bubbles v0.18.0
+## explicit; go 1.18
 github.com/charmbracelet/bubbles/cursor
 github.com/charmbracelet/bubbles/key
 github.com/charmbracelet/bubbles/runeutil
 github.com/charmbracelet/bubbles/textarea
+github.com/charmbracelet/bubbles/textarea/memoization
 github.com/charmbracelet/bubbles/viewport
 # github.com/charmbracelet/bubbletea v0.25.0
 ## explicit; go 1.17
@@ -264,7 +265,7 @@ github.com/pkg/term/termios
 ## explicit; go 1.21
 github.com/pterm/pterm
 github.com/pterm/pterm/internal
-# github.com/rivo/uniseg v0.4.4
+# github.com/rivo/uniseg v0.4.6
 ## explicit; go 1.18
 github.com/rivo/uniseg
 # github.com/sergi/go-diff v1.3.1
