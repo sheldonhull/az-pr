@@ -6,7 +6,7 @@
 ![forthebadge](https://forthebadge.com/images/badges/you-didnt-ask-for-this.svg)
 [![forthebadge](https://forthebadge.com/images/featured/featured-oooo-kill-em.svg)](https://forthebadge.com)
 
-A go clihttps://forthebadge.com/images/badges/creation https://forthebadge.com/images/badges/without having to resort to the web 
+A go cli for wrapping up azure cli pr creation, eliminating the need to do in the web-ui or clunky git aliases.
 
 # Disclaimer
 
