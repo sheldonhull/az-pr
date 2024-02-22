@@ -1,0 +1,5 @@
+kind: ⬆️ Dependencies
+body:
+  Remove go toolchain reference as this causes failure from go install with earlier
+  versions of go.
+time: 2024-02-22T13:04:48.453096-06:00

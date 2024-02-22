@@ -2,8 +2,6 @@ module github.com/sheldonhull/az-pr
 
 go 1.21
 
-toolchain go1.21.1
-
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/alessio/shellescape v1.4.2
