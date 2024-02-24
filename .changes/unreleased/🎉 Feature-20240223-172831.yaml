@@ -1,0 +1,3 @@
+kind: "\U0001F389 Feature"
+body: When you choose the commit type, git history for last `n` months (set to 6 months currently), is evaluated and the top used scope for that commit type is presuggested. To accept, just press right arrow.
+time: 2024-02-23T17:28:31.99639-06:00

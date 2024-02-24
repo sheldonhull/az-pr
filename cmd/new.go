@@ -4,10 +4,10 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -15,17 +15,17 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/transport"
 
 	"github.com/magefile/mage/sh"
 
 	"github.com/go-git/go-git/v5"
 
+	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/huh"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
-
-	"github.com/charmbracelet/bubbles/textarea"
-	tea "github.com/charmbracelet/bubbletea"
 )
 
 // newCmd represents the new command
@@ -42,6 +42,9 @@ var newCmd = &cobra.Command{
 	},
 }
 
+// evaluateScopeMonths is how far back in git history to evaluate scopes to provide with autocompletion.
+const evaluateScopeMonths int = 6
+
 func init() {
 	rootCmd.AddCommand(newCmd)
 
@@ -56,10 +59,8 @@ func init() {
 	// newCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-//nolint:gochecknoglobals // gochecknoglobals: these are globals used for conventional commit and more visible as globals for updates
-var (
-	// _conventionalCommitTypes is a collection of conventional commit types for PR creation.
-	_conventionalCommitTypes = []string{
+func conventionalCommitTypeOptions() []huh.Option[string] {
+	return huh.NewOptions(
 		"ci",
 		"build",
 		"feat",
@@ -71,8 +72,9 @@ var (
 		"docs",
 		"perf",
 		"revert",
-	}
-)
+		"security",
+	)
+}
 
 // emojify returns a nice emoji for the given commit type.
 // Emoji's make it easier to smile. :).
@@ -106,94 +108,125 @@ func emojify(commitTypeString string) string {
 	}
 }
 
-// the questions to ask
-var qs = []*survey.Question{
-	{
-		Name: "type",
-		Prompt: &survey.Select{
-			Message: "Choose a conventional commit type",
-			Options: _conventionalCommitTypes,
-		},
-		Validate: survey.Required,
-	},
-	{
-		Name:      "scope",
-		Prompt:    &survey.Input{Message: "Scope (optional, enter to skip)"},
-		Transform: survey.ToLower,
-	},
-	{
-		Name:      "title",
-		Prompt:    &survey.Input{Message: "Title"},
-		Transform: survey.ToLower,
-		Validate:  survey.Required,
-	},
-	{
-		Name:      "workitems",
-		Prompt:    &survey.Input{Message: "workitems (comma separate for multiple)"},
-		Transform: survey.ToLower,
-	},
-	{
-		Name: "draft",
-		Prompt: &survey.Select{
-			Message: "draft (true/false)",
-			Default: "false",
-			Options: []string{"true", "false"},
-		},
-	},
-	// ,
-	// {
-	// 	Name: "description",
-	// 	Prompt: &survey.Multiline{
-	// 		Message: "Description (imperative & active voice)",
-	// 		Help:    "Write imperative and active voice \nwith multiple lines for each bullet point.",
-	// 	},
-	// },
+var (
+	commit, scope      string
+	title, description string
+	confirm            bool
+)
+
+// customKeyMap uses the default keymap, but overrides certain keys so it doesn't have to all be redefined.
+func customKeyMap() *huh.KeyMap {
+	df := huh.NewDefaultKeyMap()
+	df.Quit = key.NewBinding(key.WithKeys("ctrl+c"), key.WithHelp("ctrl", "exit"))
+	df.Text.NewLine = key.NewBinding(key.WithKeys("enter", "ctrl+j"), key.WithHelp("enter / ctrl+j", "new line"))
+	df.Text.Next = key.NewBinding(key.WithKeys("tab"), key.WithHelp("tab", "next"))
+	df.Input.AcceptSuggestion = key.NewBinding(key.WithKeys("right"), key.WithHelp("→", "next"))
+	return df
 }
 
-func gatherInput() (title, description, workitems, draft string) {
+func gatherInput() (title, description, workitems string, draft bool) {
 	if Debug {
 		pterm.EnableDebugMessages()
 	}
 	var err error
-	// the answers will be written to this struct
-	answers := struct {
-		Type        string `survey:"type"`
-		Scope       string `survey:"color"`
-		Title       string `survey:"title"`
-		Description string `survey:"description"`
-		WorkItems   string `survey:"workitems"`
-		Draft       string `survey:"draft"`
-	}{}
+	var commitType, scope string
+	// var confirm bool
+	// var okWithEmptyDescription bool
 
-	// perform the questions
-	err = survey.Ask(qs, &answers)
-	if err != nil {
-		pterm.Warning.Printfln("gatherInput() you must have forgotten something: %v", err)
+	// while this can return a collection, maxResults means return the most popular single scope in last evaluateScopeMonths period.
+	// placeholderForScope := "lowercase-hypen-separated"
+
+	//	TODO: make this prettier in future :-p, cause I want to do something with the list of scopes
+
+	_, _ = pterm.DefaultInteractiveConfirm.WithDefaultText("pausing for warning output: press any key to continue").Show()
+	nf := huh.NewForm(
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title("type").
+				Value(&commitType).
+				Description("press / to quickly filter by typing").
+				Options(conventionalCommitTypeOptions()...),
+			// WithHeight(5),
+		),
+	).WithKeyMap(customKeyMap()).
+		WithTheme(huh.ThemeDracula())
+
+	if err = nf.Run(); err != nil {
+		pterm.Warning.Printfln("issue gather input, either by user cancellation, or other issue. I goofed. not your fault. ## ShouldHaveDoneTDD: %v", err)
 		os.Exit(0)
 	}
-	p := tea.NewProgram(initialModel())
+	var suggestedScope []ScopeCount
 
-	mod, err := p.Run()
+	suggestedScope, err = GetScopesInLastMonths(evaluateScopeMonths, 6, commitType)
 	if err != nil {
-		log.Fatal(err)
+		pterm.Warning.Printfln("suggested scope logic errored, continuing: %v", err)
+		// placeholderForScope = ""
+		_, _ = pterm.DefaultInteractiveConfirm.WithDefaultText("pausing for warning output: press any key to continue").Show()
 	}
-	myModelInstance, ok := mod.(model)
-	if !ok {
-		pterm.Warning.Printfln("gatherInput() issue in gather input from text input. I goofed. not your fault. ## ShouldHaveDoneTDD: %v", err)
+	var scopesToSuggest []string
+	for _, s := range suggestedScope {
+		scopesToSuggest = append(scopesToSuggest, s.Scope)
 	}
-	description = myModelInstance.textarea.Value()
-	if answers.Scope != "" {
-		answers.Scope = "(" + answers.Scope + "):"
+	// var suggestionsForScope []string{}
+	scopePlaceholder := DynamicScopeSuggestion(commitType)
+	// if len(scopeSuggestions) == 0 {
+	// 	pterm.Debug.Println("scope suggestions are just a single result, so using that value instead of scope array") // TODO: cleanup in future, it's redundant
+	// 	suggestionsForScope = []string{scopePlaceholder}
+	// }
+
+	nf = huh.NewForm(
+		huh.NewGroup(
+			// TODO: have the suggestions populate the string array list
+			huh.NewInput().Title("scope").Inline(true).Value(&scope).Suggestions(scopesToSuggest).Placeholder(scopePlaceholder).CharLimit(20),
+			huh.NewInput().Title("title").Inline(true).Value(&title).Placeholder("use lower case, present tense").CharLimit(72),
+			huh.NewText().
+				Title("PR description").
+				Placeholder("- Tell me more... "),
+			// NOTE: it is confusing as it doesn't get inserted into current group, therefore disabling and letting user choose for now
+			// related context: https://github.com/charmbracelet/huh/issues/108
+			// Validate(func(t string) error {
+			// 	if t == "" {
+			// 		if err := huh.NewConfirm().
+			// 			Title("Is it ok to proceed with an empty description?").
+			// 			Value(&okWithEmptyDescription).Run(); err != nil {
+			// 			return fmt.Errorf("NewConfirm for NewText Validate failure: %v", err)
+			// 		}
+			// 		if okWithEmptyDescription {
+			// 			return nil
+			// 		}
+			// 		return fmt.Errorf("no input was provided, so try again")
+			// 	}
+			// 	return nil
+			// }).Value(&description),
+			huh.NewConfirm().Title("draft pr?").Inline(true).Value(&draft),
+			huh.NewInput().Title("workitems").Inline(true).Value(&workitems).Placeholder("(optional) space separated"),
+			// huh.NewConfirm().Title("submit?").Inline(true).Value(&confirm),
+		),
+	).
+		WithKeyMap(customKeyMap()).
+		WithTheme(huh.ThemeDracula())
+
+	pterm.DefaultSection.Println("PR Creation")
+
+	if err = nf.Run(); err != nil {
+		pterm.Warning.Printfln("issue gather input, either by user cancellation, or other issue. I goofed. not your fault. ## ShouldHaveDoneTDD: %v", err)
+		os.Exit(0)
+	}
+
+	if scope != "" {
+		scope = "(" + scope + "):"
 	} else {
-		answers.Scope = ":"
+		scope = ":"
 	}
-	title = fmt.Sprintf("%s%s %s%s", answers.Type, answers.Scope, emojify(answers.Type), answers.Title)
+	title = fmt.Sprintf("%s%s %s%s", commitType, scope, emojify(commitType), title)
 	pterm.Info.Println(title)
 
-	draft = answers.Draft
-	workitems = answers.WorkItems
-	// pterm.Info.Println("\n" + answers.Description)
 	pterm.Info.Printfln("\n%s", description)
+
+	// if !confirm {
+	// 	pterm.Warning.Printfln("you selected to not submit, so exiting without further action")
+	// 	os.Exit(0)
+	// }
 	return title, description, workitems, draft
 }
 
@@ -326,7 +359,7 @@ func createPR() { //nolint:funlen,cyclop // this is a cli tool, not a library, o
 		"repos", "pr", "create",
 		"--output", "json", // i had issues when passing at end, so make this the first arg
 		"--title", title,
-		"--draft", draft,
+		"--draft", fmt.Sprintf("%t", draft),
 		"--auto-complete", "true",
 		"--delete-source-branch", "true",
 		"--squash",
@@ -420,63 +453,120 @@ func createPR() { //nolint:funlen,cyclop // this is a cli tool, not a library, o
 	time.Sleep(1 * time.Second)
 }
 
-type (
-	errMsg error
-	model  struct {
-		textarea textarea.Model
-		err      error
-	}
-)
-
-func initialModel() model {
-	ti := textarea.New()
-	ti.Placeholder = "- Implement tacos in app..."
-	ti.Focus()
-	return model{
-		textarea: ti,
-		err:      nil,
-	}
+type ScopeCount struct {
+	Scope string
+	Count int
 }
 
-func (m model) Init() tea.Cmd {
-	return textarea.Blink
-}
+type ByCount []ScopeCount
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmds []tea.Cmd
-	var cmd tea.Cmd
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.Type {
-		case tea.KeyEsc:
-			if m.textarea.Focused() {
-				m.textarea.Blur()
-			}
-		case tea.KeyCtrlC:
-			pterm.Warning.Println("ctrl+c pressed. exiting... make up your mind please")
-			os.Exit(0)
-		case tea.KeyCtrlD:
-			return m, tea.Quit
-		default:
-			if !m.textarea.Focused() {
-				cmd = m.textarea.Focus()
-				cmds = append(cmds, cmd)
+func (a ByCount) Len() int           { return len(a) }
+func (a ByCount) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByCount) Less(i, j int) bool { return a[i].Count > a[j].Count }
+
+func GetScopesInLastMonths(months, maxResults int, commitType string) ([]ScopeCount, error) {
+	r, err := git.PlainOpenWithOptions(".", &git.PlainOpenOptions{DetectDotGit: true})
+	if err != nil {
+		pterm.Error.Printfln("error opening repository: %v", err)
+
+		return nil, err
+	}
+
+	ref, err := r.Head()
+	if err != nil {
+		return nil, err
+	}
+
+	cIter, err := r.Log(&git.LogOptions{From: ref.Hash()})
+	if err != nil {
+		return nil, err
+	}
+	// Bulk review
+	// var commitTypes []string
+	// for _, i := range conventionalCommitTypeOptions() {
+	// 	commitTypes = append(commitTypes, i.Value)
+	// }
+	// listOfCommitTypes := strings.Join(commitTypes, "|")
+	scopeCounts := make(map[string]int)
+	err = cIter.ForEach(func(c *object.Commit) error {
+		if c.Author.When.After(time.Now().AddDate(0, -months, 0)) {
+			re := regexp.MustCompile(fmt.Sprintf(`(?:%s)\((.*?)\):`, commitType))
+			submatchall := re.FindAllStringSubmatch(c.Message, -1)
+			for _, element := range submatchall {
+				scopeCounts[element[1]]++
 			}
 		}
-	// We handle errors just like any other message
-	case errMsg:
-		m.err = msg
-		return m, nil
+		return nil
+	})
+	if err != nil {
+		return nil, err
 	}
-	m.textarea, cmd = m.textarea.Update(msg)
-	cmds = append(cmds, cmd)
-	return m, tea.Batch(cmds...)
+
+	var scopes ByCount
+	for k, v := range scopeCounts {
+		scopes = append(scopes, ScopeCount{k, v})
+	}
+
+	sort.Sort(scopes)
+	if len(scopes) > maxResults {
+		scopes = scopes[:maxResults]
+	}
+	pterm.Debug.Printfln("total scope count: %d", len(scopes))
+	pterm.Debug.Printfln("scope counts: %v", scopes)
+	return scopes, nil
 }
 
-func (m model) View() string {
-	return fmt.Sprintf(
-		"Summary of changes and why?\n\n%s\n\n%s",
-		m.textarea.View(),
-		"(ctrl+d to save, ctrl+c to quit)",
-	) + "\n\n"
+// DynamicScopeSuggestion calculates the best possible scope for the current commit type based on history.
+func DynamicScopeSuggestion(commitType string) string {
+	if commitType == "" {
+		return ""
+	}
+	r, err := git.PlainOpenWithOptions(".", &git.PlainOpenOptions{DetectDotGit: true})
+	if err != nil {
+		pterm.Error.Printfln("error opening repository: %v", err)
+		return ""
+	}
+
+	ref, err := r.Head()
+	if err != nil {
+		return ""
+	}
+
+	cIter, err := r.Log(&git.LogOptions{From: ref.Hash()})
+	if err != nil {
+		return ""
+	}
+	scopeCounts := make(map[string]int)
+	err = cIter.ForEach(func(c *object.Commit) error {
+		if c.Author.When.After(time.Now().AddDate(0, -evaluateScopeMonths, 0)) {
+			re := regexp.MustCompile(fmt.Sprintf(`(?:%s)\((.*?)\):`, commitType))
+			submatchall := re.FindAllStringSubmatch(c.Message, -1)
+			for _, element := range submatchall {
+				scopeCounts[element[1]]++
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return ""
+	}
+
+	var scopes ByCount
+	for k, v := range scopeCounts {
+		scopes = append(scopes, ScopeCount{k, v})
+	}
+
+	sort.Sort(scopes)
+	if len(scopes) > 1 {
+		scopes = scopes[:1]
+	}
+	pterm.Debug.Printfln("total scope count: %d", len(scopes))
+	pterm.Debug.Printfln("scope counts: %v", scopes)
+
+	if len(scopes) > 0 {
+		scopeRecommendation := scopes[0].Scope
+		pterm.Debug.Printfln("best recommendation is: %s", scopeRecommendation)
+		return scopeRecommendation
+	}
+	return ""
 }

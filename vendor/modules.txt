@@ -66,17 +66,27 @@ github.com/c-bata/go-prompt/internal/bisect
 github.com/c-bata/go-prompt/internal/debug
 github.com/c-bata/go-prompt/internal/strings
 github.com/c-bata/go-prompt/internal/term
+# github.com/catppuccin/go v0.2.0
+## explicit; go 1.19
+github.com/catppuccin/go
 # github.com/charmbracelet/bubbles v0.18.0
 ## explicit; go 1.18
 github.com/charmbracelet/bubbles/cursor
+github.com/charmbracelet/bubbles/help
 github.com/charmbracelet/bubbles/key
+github.com/charmbracelet/bubbles/paginator
 github.com/charmbracelet/bubbles/runeutil
 github.com/charmbracelet/bubbles/textarea
 github.com/charmbracelet/bubbles/textarea/memoization
+github.com/charmbracelet/bubbles/textinput
 github.com/charmbracelet/bubbles/viewport
 # github.com/charmbracelet/bubbletea v0.25.0
 ## explicit; go 1.17
 github.com/charmbracelet/bubbletea
+# github.com/charmbracelet/huh v0.3.0
+## explicit; go 1.18
+github.com/charmbracelet/huh
+github.com/charmbracelet/huh/accessibility
 # github.com/charmbracelet/lipgloss v0.9.1
 ## explicit; go 1.17
 github.com/charmbracelet/lipgloss
@@ -222,7 +232,7 @@ github.com/magefile/mage/sh
 # github.com/mattn/go-colorable v0.1.13
 ## explicit; go 1.15
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.18
+# github.com/mattn/go-isatty v0.0.20
 ## explicit; go 1.15
 github.com/mattn/go-isatty
 # github.com/mattn/go-localereader v0.0.1
@@ -326,7 +336,7 @@ golang.org/x/mod/semver
 golang.org/x/net/context
 golang.org/x/net/internal/socks
 golang.org/x/net/proxy
-# golang.org/x/sync v0.3.0
+# golang.org/x/sync v0.4.0
 ## explicit; go 1.17
 golang.org/x/sync/errgroup
 # golang.org/x/sys v0.16.0

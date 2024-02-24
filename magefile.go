@@ -127,3 +127,9 @@ func Run() error {
 	}
 	return sh.RunV(targetBuildFile, "shell", "--debug")
 }
+
+// 📦 Install the tool from remote.
+// This can help catch odd issues with embed for example.
+func Install() error {
+	return sh.RunV("go", "install", "github.com/sheldonhull/az-pr@latest")
+}

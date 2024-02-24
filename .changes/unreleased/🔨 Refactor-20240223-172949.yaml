@@ -1,0 +1,7 @@
+kind: "\U0001F528 Refactor"
+body:
+  'Migrate from pterm input to using `huh` a new charm library that provides a
+  form that can allow toggling back and forth on the form as a normal TUI, allowing
+  edits before submitting. This reduces some of the validation logic as well, but
+  minor compromises made overall. '
+time: 2024-02-23T17:29:49.126775-06:00
