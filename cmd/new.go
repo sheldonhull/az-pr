@@ -181,7 +181,8 @@ func gatherInput() (title, description, workitems string, draft bool) {
 			huh.NewInput().Title("title").Inline(true).Value(&title).Placeholder("use lower case, present tense").CharLimit(72),
 			huh.NewText().
 				Title("PR description").
-				Placeholder("- Tell me more... "),
+				Placeholder("- Tell me more... ").
+				Value(&description),
 			// NOTE: it is confusing as it doesn't get inserted into current group, therefore disabling and letting user choose for now
 			// related context: https://github.com/charmbracelet/huh/issues/108
 			// Validate(func(t string) error {
