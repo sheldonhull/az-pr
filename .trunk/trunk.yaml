@@ -24,6 +24,13 @@ lint:
     - gitleaks@8.18.0
     - yamllint@1.32.0
     - golangci-lint@1.54.2
+  ignore:
+    - linters:
+        - ALL
+      paths:
+        - '.artifacts/**'
+        - '.cache/**'
+        - 'vendor/**'
 runtimes:
   enabled:
     - go@>=1.21.1
