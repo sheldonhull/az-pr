@@ -117,6 +117,7 @@ var (
 // customKeyMap uses the default keymap, but overrides certain keys so it doesn't have to all be redefined.
 func customKeyMap() *huh.KeyMap {
 	df := huh.NewDefaultKeyMap()
+	// df.Confirm.Submit = key.NewBinding(key.WithKeys("ctrl+s"), key.WithHelp("💾 ctrl+s", "submit form"))
 	df.Quit = key.NewBinding(key.WithKeys("ctrl+c"), key.WithHelp("ctrl", "exit"))
 	df.Text.NewLine = key.NewBinding(key.WithKeys("enter", "ctrl+j"), key.WithHelp("enter / ctrl+j", "new line"))
 	df.Text.Next = key.NewBinding(key.WithKeys("tab"), key.WithHelp("tab", "next"))
@@ -130,7 +131,7 @@ func gatherInput() (title, description, workitems string, draft bool) {
 	}
 	var err error
 	var commitType, scope string
-	// var confirm bool
+	var confirm bool
 	// var okWithEmptyDescription bool
 
 	// while this can return a collection, maxResults means return the most popular single scope in last evaluateScopeMonths period.
@@ -138,7 +139,6 @@ func gatherInput() (title, description, workitems string, draft bool) {
 
 	//	TODO: make this prettier in future :-p, cause I want to do something with the list of scopes
 
-	_, _ = pterm.DefaultInteractiveConfirm.WithDefaultText("pausing for warning output: press any key to continue").Show()
 	nf := huh.NewForm(
 		huh.NewGroup(
 			huh.NewSelect[string]().
@@ -160,8 +160,6 @@ func gatherInput() (title, description, workitems string, draft bool) {
 	suggestedScope, err = GetScopesInLastMonths(evaluateScopeMonths, 6, commitType)
 	if err != nil {
 		pterm.Warning.Printfln("suggested scope logic errored, continuing: %v", err)
-		// placeholderForScope = ""
-		_, _ = pterm.DefaultInteractiveConfirm.WithDefaultText("pausing for warning output: press any key to continue").Show()
 	}
 	var scopesToSuggest []string
 	for _, s := range suggestedScope {
@@ -201,14 +199,16 @@ func gatherInput() (title, description, workitems string, draft bool) {
 			// }).Value(&description),
 			huh.NewConfirm().Title("draft pr?").Inline(true).Value(&draft),
 			huh.NewInput().Title("workitems").Inline(true).Value(&workitems).Placeholder("(optional) space separated"),
-			// huh.NewConfirm().Title("submit?").Inline(true).Value(&confirm),
+			huh.NewConfirm().Title("submit?").Inline(true).Value(&confirm),
 		),
 	).
 		WithKeyMap(customKeyMap()).
 		WithTheme(huh.ThemeDracula())
 
 	pterm.DefaultSection.Println("PR Creation")
-
+	if !confirm {
+		pterm.Warning.Println("confirm was set to false")
+	}
 	if err = nf.Run(); err != nil {
 		pterm.Warning.Printfln("issue gather input, either by user cancellation, or other issue. I goofed. not your fault. ## ShouldHaveDoneTDD: %v", err)
 		os.Exit(0)
@@ -224,10 +224,10 @@ func gatherInput() (title, description, workitems string, draft bool) {
 
 	pterm.Info.Printfln("\n%s", description)
 
-	// if !confirm {
-	// 	pterm.Warning.Printfln("you selected to not submit, so exiting without further action")
-	// 	os.Exit(0)
-	// }
+	if !confirm {
+		pterm.Warning.Printfln("you selected to not submit, so exiting without further action")
+		os.Exit(0)
+	}
 	return title, description, workitems, draft
 }
 

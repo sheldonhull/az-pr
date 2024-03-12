@@ -5,6 +5,8 @@
 package main
 
 import (
+	"fmt"
+	"go/build"
 	"os"
 	"path/filepath"
 	"strings"
@@ -22,6 +24,9 @@ import (
 	// mage:import
 	"github.com/sheldonhull/magetools/gotools"
 )
+
+// Install is for installation commands to be grouped.
+type Install mg.Namespace
 
 // artifactDirectory is a directory containing artifacts for the project and shouldn't be committed to source.
 const artifactDirectory = ".artifacts"
@@ -130,6 +135,32 @@ func Run() error {
 
 // 📦 Install the tool from remote.
 // This can help catch odd issues with embed for example.
-func Install() error {
+func (Install) Remote() error {
 	return sh.RunV("go", "install", "github.com/sheldonhull/az-pr@latest")
+}
+
+// 📦 Local Install
+// Build and install to GOPATH/bin to run locally and make sure everything works great.
+func (Install) Local() error {
+	start := time.Now()
+	defer func() {
+		duration := durafmt.Parse(time.Since(start))
+		pterm.Success.Printfln("✅ Run() took %s", duration)
+	}()
+	targetBuildFile := filepath.Join(artifactDirectory, "az-pr")
+
+	gopath := os.Getenv("GOPATH")
+	if gopath == "" {
+		gopath = build.Default.GOPATH
+	}
+	targetLocalBinaryPath := filepath.Join(gopath, "bin", "az-pr")
+	if err := sh.RunV("go", "build", "-o", targetBuildFile, "main.go"); err != nil {
+		return fmt.Errorf("failed to build: %w", err)
+	}
+	pterm.Info.Printfln("binary: %s", targetBuildFile)
+	if err := sh.Copy(targetLocalBinaryPath, targetBuildFile); err != nil {
+		return fmt.Errorf("failed to cp %s %s to: %w", targetBuildFile, targetLocalBinaryPath, err)
+	}
+	pterm.Success.Printfln("✅ az-pr installed to: %s", targetLocalBinaryPath)
+	return nil
 }
