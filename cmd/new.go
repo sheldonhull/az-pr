@@ -231,6 +231,19 @@ func gatherInput() (title, description, workitems string, draft bool) {
 	return title, description, workitems, draft
 }
 
+// getRemote reads the current remote url from git.
+func getRemote() (remoteConfig *git.Remote, err error) {
+	r, err := git.PlainOpen(".")
+	if err != nil {
+		return nil, fmt.Errorf("unable to open git repo: %w", err)
+	}
+	remoteConfig, err = r.Remote("origin")
+	if err != nil {
+		return nil, fmt.Errorf("unable to get remote for origin: %w", err)
+	}
+	return remoteConfig, nil
+}
+
 // trunk-ignore(golangci-lint/funlen)
 func getUpstreamBranch() (branchName string, err error) {
 	if Debug {
@@ -337,6 +350,44 @@ func detectSSH() bool {
 	}
 }
 
+type RemoteConfigData struct {
+	RemoteConfig *git.Remote
+}
+
+func (r *RemoteConfigData) GetURL() (url string) {
+	if len(r.RemoteConfig.Config().URLs) > 0 {
+		url = r.RemoteConfig.Config().URLs[0]
+		pterm.Debug.Printfln("(r *RemoteConfigData) GetURL(): %s", url)
+		return url
+	}
+	return ""
+}
+
+// ProjectName parses the project name out of ssh://git@ssh.dev.azure.com:v3/{org}/{project}/{repo}
+func (r *RemoteConfigData) ProjectName() (project string) {
+	url := r.GetURL()
+	project = strings.Split(url, "/")[5]
+	pterm.Debug.Printfln("(r *RemoteConfigData) ProjectName(): %s", project)
+	return project
+}
+
+// RepoName parses the repo name out of git@ssh.dev.azure.com:v3/{org}/{project}/{repo}
+func (r *RemoteConfigData) RepoName() (repo string) {
+	url := r.GetURL()
+	repo = strings.Split(url, "/")[6]
+	pterm.Debug.Printfln("(r *RemoteConfigData) RepoName(): %s", repo)
+
+	return repo
+}
+
+// OrgName parses the repo name out of git@ssh.dev.azure.com:v3/{org}/{project}/{repo}
+func (r *RemoteConfigData) OrgName() (org string) {
+	url := r.GetURL()
+	org = strings.Split(url, "/")[4]
+	pterm.Debug.Printfln("(r *RemoteConfigData) OrgName(): %s", org)
+	return org
+}
+
 func createPR() { //nolint:funlen,cyclop // this is a cli tool, not a library, ok with longer workflow command
 	if Debug {
 		pterm.EnableDebugMessages()
@@ -344,15 +395,28 @@ func createPR() { //nolint:funlen,cyclop // this is a cli tool, not a library, o
 	var branchName string
 	var err error
 	isSSH := detectSSH()
+	remoteData := RemoteConfigData{}
 
 	// NOTE: can't use autodetect with ssh so have to be specific:
 	// Per error: DevOps SSH URLs are not supported for repo auto-detection yet. https://github.com/Microsoft/azure-devops-cli-extension/issues/142
 	// Attempt to calculate for user based on main/master pattern.
 	if isSSH {
+		pterm.Debug.Println("ssh based repo identified")
 		branchName, err = getUpstreamBranch()
 		if err != nil {
 			pterm.Warning.Printfln("isSSH check for getUpstreamBranch: %v", err)
 		}
+
+		rd, err := getRemote()
+		if err != nil {
+			pterm.Warning.Printfln("unable to process origin remote config data: %v", err)
+		}
+		remoteData.RemoteConfig = rd
+		// pterm.Debug.Printfln("remoteData: %v", remoteData.RemoteConfig)
+		pterm.Debug.Printfln("remoteURL: %s", remoteData.GetURL())
+		pterm.Debug.Printfln("projectName: %s", remoteData.ProjectName())
+		pterm.Debug.Printfln("repoName: %s", remoteData.RepoName())
+		pterm.Debug.Printfln("orgName: %s", remoteData.OrgName())
 	}
 
 	title, description, workitems, draft := gatherInput()
@@ -373,6 +437,8 @@ func createPR() { //nolint:funlen,cyclop // this is a cli tool, not a library, o
 		pterm.Debug.Printfln("isSSH && branchName is: %s", branchName)
 		args = append(args, "--target-branch")
 		args = append(args, branchName)
+		args = append(args, "--repository", remoteData.RepoName())
+		args = append(args, "--project", remoteData.ProjectName())
 	} else {
 		pterm.Debug.Println("target-branch is not set so default branch set in Azure Repos will be used")
 		args = append(args, "--detect")
