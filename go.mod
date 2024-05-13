@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/alessio/shellescape v1.4.2
-	github.com/bitfield/script v0.22.0
+	github.com/bitfield/script v0.22.1
 	github.com/brianstrauch/cobra-shell v0.5.0
 	github.com/c-bata/go-prompt v0.2.6
 	github.com/charmbracelet/bubbles v0.18.0
@@ -46,7 +46,7 @@ require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/gookit/color v1.5.4 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/itchyny/gojq v0.12.12 // indirect
+	github.com/itchyny/gojq v0.12.13 // indirect
 	github.com/itchyny/timefmt-go v0.1.5 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
@@ -81,5 +81,5 @@ require (
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.13.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
-	mvdan.cc/sh/v3 v3.6.0 // indirect
+	mvdan.cc/sh/v3 v3.7.0 // indirect
 )
