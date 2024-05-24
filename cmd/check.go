@@ -103,7 +103,7 @@ func checkAzEnv() ([]string, error) {
 		// pterm.Error.Println("🧪 AZURE_DEVOPS_EXT_PAT is not set as env variable.\n" +
 		// 	"This is required to be able to create pull requests.\n" +
 		// 	"👉 Recommend export AZURE_DEVOPS_EXT_PAT=\"\" in your $HOME/.envrc, .zshenv, .bashprofile, etc.")
-		return []string{"❌", "AZURE_DEVOPS_EXT_PAT", "not set", "env var is required for auth UNLESS using SSO based login (better security ⚡)"}, errors.New("AZURE_DEVOPS_EXT_PAT not set")
+		return []string{"⚠️", "AZURE_DEVOPS_EXT_PAT", "not set", "env var is required for auth UNLESS using SSO based login (better security ⚡)"}, errors.New("AZURE_DEVOPS_EXT_PAT not set")
 	}
 	return []string{"✅", "AZURE_DEVOPS_EXT_PAT", "detected", ""}, nil
 }

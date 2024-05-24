@@ -244,6 +244,19 @@ func getRemote() (remoteConfig *git.Remote, err error) {
 	return remoteConfig, nil
 }
 
+// getCurrentBranchName reads the current branch name from git.
+func getCurrentBranchName() (branchName string, err error) {
+	r, err := git.PlainOpen(".")
+	if err != nil {
+		return "", fmt.Errorf("unable to open git repo: %w", err)
+	}
+	head, err := r.Head()
+	if err != nil {
+		return "", fmt.Errorf("unable to get head from git: %w", err)
+	}
+	return head.Name().Short(), nil
+}
+
 // trunk-ignore(golangci-lint/funlen)
 func getUpstreamBranch() (branchName string, err error) {
 	if Debug {
@@ -392,7 +405,7 @@ func createPR() { //nolint:funlen,cyclop // this is a cli tool, not a library, o
 	if Debug {
 		pterm.EnableDebugMessages()
 	}
-	var branchName string
+	var branchName, currentBranch string
 	var err error
 	isSSH := detectSSH()
 	remoteData := RemoteConfigData{}
@@ -405,6 +418,10 @@ func createPR() { //nolint:funlen,cyclop // this is a cli tool, not a library, o
 		branchName, err = getUpstreamBranch()
 		if err != nil {
 			pterm.Warning.Printfln("isSSH check for getUpstreamBranch: %v", err)
+		}
+		currentBranch, err = getCurrentBranchName()
+		if err != nil {
+			pterm.Warning.Printfln("isSSH check for getCurrentBranchName: %v", err)
 		}
 
 		rd, err := getRemote()
@@ -437,8 +454,11 @@ func createPR() { //nolint:funlen,cyclop // this is a cli tool, not a library, o
 		pterm.Debug.Printfln("isSSH && branchName is: %s", branchName)
 		args = append(args, "--target-branch")
 		args = append(args, branchName)
+		args = append(args, "--source-branch", currentBranch)
+		args = append(args, "--organization", fmt.Sprintf("https://dev.azure.com/%s", remoteData.OrgName()))
 		args = append(args, "--repository", remoteData.RepoName())
 		args = append(args, "--project", remoteData.ProjectName())
+		args = append(args, "--detect", "false") // force it not to try and do autodetection as detect doesn't work with SSH
 	} else {
 		pterm.Debug.Println("target-branch is not set so default branch set in Azure Repos will be used")
 		args = append(args, "--detect")
@@ -492,19 +512,24 @@ func createPR() { //nolint:funlen,cyclop // this is a cli tool, not a library, o
 		associateWorkItemIDargs := []string{
 			"repos", "pr", "work-item", "add",
 			"--id", fmt.Sprintf("%d", prResponse.PullRequestID),
-			"--work-items",
 		}
-
+		if isSSH {
+			associateWorkItemIDargs = append(associateWorkItemIDargs, "--organization", fmt.Sprintf("https://dev.azure.com/%s", remoteData.OrgName()))
+			associateWorkItemIDargs = append(associateWorkItemIDargs, "--repository", remoteData.RepoName())
+			associateWorkItemIDargs = append(associateWorkItemIDargs, "--project", remoteData.ProjectName())
+			associateWorkItemIDargs = append(associateWorkItemIDargs, "--detect", "false") // force it not to try and do autodetection as detect doesn't work with SSH
+		}
 		pterm.Success.Printf("Work Item IDs: %s\n", workitems)
 		// Argument escaping seems to have issues with spaces in string
 		// This as a workaround to turn the space delimited string into each being an individual argument to pass to command processor.
+
+		associateWorkItemIDargs = append(associateWorkItemIDargs, "--work-items")
 		itemIDs := strings.Split(workitems, " ")
 		associateWorkItemIDargs = append(associateWorkItemIDargs, itemIDs...)
 		pterm.Info.Println("az " + shellescape.QuoteCommand(associateWorkItemIDargs))
 
 		if err := sh.Run("az", associateWorkItemIDargs...); err != nil {
 			pterm.Error.Printf("failure associating work-items via az-cli:\n%v\n\n", err)
-
 			os.Exit(0)
 		}
 	} else {
