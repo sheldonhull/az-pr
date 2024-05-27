@@ -55,7 +55,6 @@ func NewMultiSelect[T comparable]() *MultiSelect[T] {
 		validate:  func([]T) error { return nil },
 		filtering: false,
 		filter:    filter,
-		theme:     ThemeCharm(),
 	}
 }
 
@@ -149,6 +148,11 @@ func (*MultiSelect[T]) Skip() bool {
 	return false
 }
 
+// Zoom returns whether the multiselect should be zoomed.
+func (*MultiSelect[T]) Zoom() bool {
+	return false
+}
+
 // Focus focuses the multi-select field.
 func (m *MultiSelect[T]) Focus() tea.Cmd {
 	m.focused = true
@@ -163,7 +167,17 @@ func (m *MultiSelect[T]) Blur() tea.Cmd {
 
 // KeyBinds returns the help message for the multi-select field.
 func (m *MultiSelect[T]) KeyBinds() []key.Binding {
-	return []key.Binding{m.keymap.Toggle, m.keymap.Up, m.keymap.Down, m.keymap.Filter, m.keymap.SetFilter, m.keymap.ClearFilter, m.keymap.Prev, m.keymap.Submit, m.keymap.Next}
+	return []key.Binding{
+		m.keymap.Toggle,
+		m.keymap.Up,
+		m.keymap.Down,
+		m.keymap.Filter,
+		m.keymap.SetFilter,
+		m.keymap.ClearFilter,
+		m.keymap.Prev,
+		m.keymap.Submit,
+		m.keymap.Next,
+	}
 }
 
 // Init initializes the multi-select field.
@@ -219,6 +233,24 @@ func (m *MultiSelect[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.cursor >= m.viewport.YOffset+m.viewport.Height {
 				m.viewport.LineDown(1)
 			}
+		case key.Matches(msg, m.keymap.GotoTop):
+			if m.filtering {
+				break
+			}
+			m.cursor = 0
+			m.viewport.GotoTop()
+		case key.Matches(msg, m.keymap.GotoBottom):
+			if m.filtering {
+				break
+			}
+			m.cursor = len(m.filteredOptions) - 1
+			m.viewport.GotoBottom()
+		case key.Matches(msg, m.keymap.HalfPageUp):
+			m.cursor = max(m.cursor-m.viewport.Height/2, 0)
+			m.viewport.HalfViewUp()
+		case key.Matches(msg, m.keymap.HalfPageDown):
+			m.cursor = min(m.cursor+m.viewport.Height/2, len(m.filteredOptions)-1)
+			m.viewport.HalfViewDown()
 		case key.Matches(msg, m.keymap.Toggle):
 			for i, option := range m.options {
 				if option.Key == m.filteredOptions[m.cursor].Key {
@@ -235,13 +267,13 @@ func (m *MultiSelect[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.err != nil {
 				return m, nil
 			}
-			return m, prevField
+			return m, PrevField
 		case key.Matches(msg, m.keymap.Next, m.keymap.Submit):
 			m.finalize()
 			if m.err != nil {
 				return m, nil
 			}
-			return m, nextField
+			return m, NextField
 		}
 
 		if m.filtering {
@@ -273,11 +305,6 @@ func (m *MultiSelect[T]) updateViewportHeight() {
 		return
 	}
 
-	// Wait until the theme has appied or things'll panic.
-	if m.theme == nil {
-		return
-	}
-
 	const minHeight = 1
 	m.viewport.Height = max(minHeight, m.height-
 		lipgloss.Height(m.titleView())-
@@ -305,13 +332,20 @@ func (m *MultiSelect[T]) finalize() {
 }
 
 func (m *MultiSelect[T]) activeStyles() *FieldStyles {
-	if m.focused {
-		return &m.theme.Focused
+	theme := m.theme
+	if theme == nil {
+		theme = ThemeCharm()
 	}
-	return &m.theme.Blurred
+	if m.focused {
+		return &theme.Focused
+	}
+	return &theme.Blurred
 }
 
 func (m *MultiSelect[T]) titleView() string {
+	if m.title == "" {
+		return ""
+	}
 	var (
 		styles = m.activeStyles()
 		sb     = strings.Builder{}
@@ -371,8 +405,10 @@ func (m *MultiSelect[T]) View() string {
 	m.viewport.SetContent(m.choicesView())
 
 	var sb strings.Builder
-	sb.WriteString(m.titleView())
-	sb.WriteString("\n")
+	if m.title != "" {
+		sb.WriteString(m.titleView())
+		sb.WriteString("\n")
+	}
 	if m.description != "" {
 		sb.WriteString(m.descriptionView() + "\n")
 	}
@@ -381,23 +417,22 @@ func (m *MultiSelect[T]) View() string {
 }
 
 func (m *MultiSelect[T]) printOptions() {
-	var (
-		sb strings.Builder
-	)
+	styles := m.activeStyles()
+	var sb strings.Builder
 
-	sb.WriteString(m.theme.Focused.Title.Render(m.title))
+	sb.WriteString(styles.Title.Render(m.title))
 	sb.WriteString("\n")
 
 	for i, option := range m.options {
 		if option.selected {
-			sb.WriteString(m.theme.Focused.SelectedOption.Render(fmt.Sprintf("%d. %s %s", i+1, "✓", option.Key)))
+			sb.WriteString(styles.SelectedOption.Render(fmt.Sprintf("%d. %s %s", i+1, "✓", option.Key)))
 		} else {
 			sb.WriteString(fmt.Sprintf("%d. %s %s", i+1, " ", option.Key))
 		}
 		sb.WriteString("\n")
 	}
 
-	fmt.Println(m.theme.Blurred.Base.Render(sb.String()))
+	fmt.Println(sb.String())
 }
 
 // setFilter sets the filter of the select field.
@@ -428,6 +463,7 @@ func (m *MultiSelect[T]) Run() error {
 // runAccessible() runs the multi-select field in accessible mode.
 func (m *MultiSelect[T]) runAccessible() error {
 	m.printOptions()
+	styles := m.activeStyles()
 
 	var choice int
 	for {
@@ -442,6 +478,11 @@ func (m *MultiSelect[T]) runAccessible() error {
 				continue
 			}
 			break
+		}
+
+		if !m.options[choice-1].selected && m.limit > 0 && m.numSelected() >= m.limit {
+			fmt.Printf("You can't select more than %d options.\n", m.limit)
+			continue
 		}
 		m.options[choice-1].selected = !m.options[choice-1].selected
 		if m.options[choice-1].selected {
@@ -462,12 +503,15 @@ func (m *MultiSelect[T]) runAccessible() error {
 		}
 	}
 
-	fmt.Println(m.theme.Focused.SelectedOption.Render("Selected:", strings.Join(values, ", ")+"\n"))
+	fmt.Println(styles.SelectedOption.Render("Selected:", strings.Join(values, ", ")+"\n"))
 	return nil
 }
 
 // WithTheme sets the theme of the multi-select field.
 func (m *MultiSelect[T]) WithTheme(theme *Theme) Field {
+	if m.theme != nil {
+		return m
+	}
 	m.theme = theme
 	m.filter.Cursor.Style = m.theme.Focused.TextInput.Cursor
 	m.filter.PromptStyle = m.theme.Focused.TextInput.Prompt
@@ -493,7 +537,7 @@ func (m *MultiSelect[T]) WithWidth(width int) Field {
 	return m
 }
 
-// WithHeight sets the width of the multi-select field.
+// WithHeight sets the height of the multi-select field.
 func (m *MultiSelect[T]) WithHeight(height int) Field {
 	m.height = height
 	return m
