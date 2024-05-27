@@ -14,7 +14,7 @@ require (
 	github.com/ivanpirog/coloredcobra v1.0.1
 	github.com/magefile/mage v1.15.0
 	github.com/pterm/pterm v0.12.79
-	github.com/sheldonhull/magetools v1.0.1
+	github.com/sheldonhull/magetools v1.0.2
 	github.com/spf13/cobra v1.8.0
 )
 
@@ -78,7 +78,7 @@ require (
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/ztrue/tracerr v0.4.0 // indirect
 	golang.org/x/crypto v0.23.0 // indirect
-	golang.org/x/mod v0.12.0 // indirect
+	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
