@@ -58,7 +58,6 @@ func NewText() *Text {
 		editorCmd:       editorCmd,
 		editorArgs:      editorArgs,
 		editorExtension: "md",
-		theme:           ThemeCharm(),
 	}
 
 	return t
@@ -98,6 +97,12 @@ func (t *Text) Description(description string) *Text {
 // CharLimit sets the character limit of the text field.
 func (t *Text) CharLimit(charlimit int) *Text {
 	t.textarea.CharLimit = charlimit
+	return t
+}
+
+// ShowLineNumbers sets whether or not to show line numbers.
+func (t *Text) ShowLineNumbers(show bool) *Text {
+	t.textarea.ShowLineNumbers = show
 	return t
 }
 
@@ -154,6 +159,11 @@ func (*Text) Skip() bool {
 	return false
 }
 
+// Zoom returns whether the note should be zoomed.
+func (*Text) Zoom() bool {
+	return false
+}
+
 // Focus focuses the text field.
 func (t *Text) Focus() tea.Cmd {
 	t.focused = true
@@ -194,6 +204,10 @@ func (t *Text) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case updateValueMsg:
 		t.textarea.SetValue(string(msg))
+		t.textarea, cmd = t.textarea.Update(msg)
+		cmds = append(cmds, cmd)
+		*t.value = t.textarea.Value()
+
 	case tea.KeyMsg:
 		t.err = nil
 
@@ -201,10 +215,11 @@ func (t *Text) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, t.keymap.Editor):
 			ext := strings.TrimPrefix(t.editorExtension, ".")
 			tmpFile, _ := os.CreateTemp(os.TempDir(), "*."+ext)
-			cmd := exec.Command(t.editorCmd, append(t.editorArgs, tmpFile.Name())...) //nolint:gosec
-			_ = os.WriteFile(tmpFile.Name(), []byte(t.textarea.Value()), os.ModePerm)
+			cmd := exec.Command(t.editorCmd, append(t.editorArgs, tmpFile.Name())...)
+			_ = os.WriteFile(tmpFile.Name(), []byte(t.textarea.Value()), 0600)
 			cmds = append(cmds, tea.ExecProcess(cmd, func(error) tea.Msg {
 				content, _ := os.ReadFile(tmpFile.Name())
+				_ = os.Remove(tmpFile.Name())
 				return updateValueMsg(content)
 			}))
 		case key.Matches(msg, t.keymap.Next, t.keymap.Submit):
@@ -213,33 +228,45 @@ func (t *Text) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if t.err != nil {
 				return t, nil
 			}
-			cmds = append(cmds, nextField)
+			cmds = append(cmds, NextField)
 		case key.Matches(msg, t.keymap.Prev):
 			value := t.textarea.Value()
 			t.err = t.validate(value)
 			if t.err != nil {
 				return t, nil
 			}
-			cmds = append(cmds, prevField)
+			cmds = append(cmds, PrevField)
 		}
 	}
 
 	return t, tea.Batch(cmds...)
 }
 
+func (t *Text) activeStyles() *FieldStyles {
+	theme := t.theme
+	if theme == nil {
+		theme = ThemeCharm()
+	}
+	if t.focused {
+		return &theme.Focused
+	}
+	return &theme.Blurred
+}
+
+func (t *Text) activeTextAreaStyles() *textarea.Style {
+	if t.theme == nil {
+		return &t.textarea.BlurredStyle
+	}
+	if t.focused {
+		return &t.textarea.FocusedStyle
+	}
+	return &t.textarea.BlurredStyle
+}
+
 // View renders the text field.
 func (t *Text) View() string {
-	var (
-		styles         FieldStyles
-		textareaStyles *textarea.Style
-	)
-	if t.focused {
-		styles = t.theme.Focused
-		textareaStyles = &t.textarea.FocusedStyle
-	} else {
-		styles = t.theme.Blurred
-		textareaStyles = &t.textarea.BlurredStyle
-	}
+	var styles = t.activeStyles()
+	var textareaStyles = t.activeTextAreaStyles()
 
 	// NB: since the method is on a pointer receiver these are being mutated.
 	// Because this runs on every render this shouldn't matter in practice,
@@ -277,15 +304,29 @@ func (t *Text) Run() error {
 
 // runAccessible runs an accessible text field.
 func (t *Text) runAccessible() error {
-	fmt.Println(t.theme.Blurred.Base.Render(t.theme.Focused.Title.Render(t.title)))
+	styles := t.activeStyles()
+	fmt.Println(styles.Title.Render(t.title))
 	fmt.Println()
-	*t.value = accessibility.PromptString("Input: ", t.validate)
+	*t.value = accessibility.PromptString("Input: ", func(input string) error {
+		if err := t.validate(input); err != nil {
+			// Handle the error from t.validate, return it
+			return err
+		}
+
+		if len(input) > t.textarea.CharLimit {
+			return fmt.Errorf("Input cannot exceed %d characters", t.textarea.CharLimit)
+		}
+		return nil
+	})
 	fmt.Println()
 	return nil
 }
 
 // WithTheme sets the theme on a text field.
 func (t *Text) WithTheme(theme *Theme) Field {
+	if t.theme != nil {
+		return t
+	}
 	t.theme = theme
 	return t
 }
@@ -306,7 +347,7 @@ func (t *Text) WithAccessible(accessible bool) Field {
 // WithWidth sets the width of the text field.
 func (t *Text) WithWidth(width int) Field {
 	t.width = width
-	t.textarea.SetWidth(width - t.theme.Blurred.Base.GetHorizontalFrameSize())
+	t.textarea.SetWidth(width - t.activeStyles().Base.GetHorizontalFrameSize())
 	return t
 }
 
@@ -319,7 +360,7 @@ func (t *Text) WithHeight(height int) Field {
 	if t.description != "" {
 		adjust++
 	}
-	t.textarea.SetHeight(height - t.theme.Blurred.Base.GetVerticalFrameSize() - adjust)
+	t.textarea.SetHeight(height - t.activeStyles().Base.GetVerticalFrameSize() - adjust)
 	return t
 }
 

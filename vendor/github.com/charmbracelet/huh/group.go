@@ -38,7 +38,6 @@ type Group struct {
 	// group options
 	width  int
 	height int
-	theme  *Theme
 	keymap *KeyMap
 	hide   func() bool
 }
@@ -57,6 +56,7 @@ func NewGroup(fields ...Field) *Group {
 	}
 
 	height := group.fullHeight()
+	//nolint:gomnd
 	v := viewport.New(80, height)
 	group.viewport = v
 	group.height = height
@@ -90,10 +90,12 @@ func (g *Group) WithShowErrors(show bool) *Group {
 
 // WithTheme sets the theme on a group.
 func (g *Group) WithTheme(t *Theme) *Group {
-	g.theme = t
 	g.help.Styles = t.Help
 	for _, field := range g.fields {
 		field.WithTheme(t)
+	}
+	if g.height <= 0 {
+		g.WithHeight(g.fullHeight())
 	}
 	return g
 }
@@ -120,11 +122,11 @@ func (g *Group) WithWidth(width int) *Group {
 // WithHeight sets the height on a group.
 func (g *Group) WithHeight(height int) *Group {
 	g.height = height
-	g.viewport.Height = height - 1
+	g.viewport.Height = height
 	for _, field := range g.fields {
 		// A field height must not exceed the form height.
 		if height-1 <= lipgloss.Height(field.View()) {
-			field.WithHeight(height - 1)
+			field.WithHeight(height)
 		}
 	}
 	return g
@@ -165,13 +167,13 @@ type nextFieldMsg struct{}
 // different key bindings or events to trigger group progression.
 type prevFieldMsg struct{}
 
-// nextField is the command to move to the next field.
-func nextField() tea.Msg {
+// NextField is the command to move to the next field.
+func NextField() tea.Msg {
 	return nextFieldMsg{}
 }
 
-// prevField is the command to move to the previous field.
-func prevField() tea.Msg {
+// PrevField is the command to move to the previous field.
+func PrevField() tea.Msg {
 	return prevFieldMsg{}
 }
 
@@ -190,6 +192,7 @@ func (g *Group) Init() tea.Cmd {
 
 	cmd := g.fields[g.paginator.Page].Focus()
 	cmds = append(cmds, cmd)
+	g.buildView()
 	return tea.Batch(cmds...)
 }
 
@@ -233,70 +236,69 @@ func (g *Group) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	m, cmd := g.fields[g.paginator.Page].Update(msg)
 	g.fields[g.paginator.Page] = m.(Field)
-
 	cmds = append(cmds, cmd)
 
-	switch msg.(type) {
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		g.WithHeight(min(g.height, min(g.fullHeight(), msg.Height-1)))
 	case nextFieldMsg:
 		cmds = append(cmds, g.nextField()...)
-		offset := 0
-		for i := 0; i <= g.paginator.Page; i++ {
-			offset += lipgloss.Height(g.fields[i].View()) + 1
-		}
-		g.viewport.SetYOffset(offset)
-
 	case prevFieldMsg:
 		cmds = append(cmds, g.prevField()...)
-		offset := 0
-		for i := 0; i < g.paginator.Page; i++ {
-			offset += lipgloss.Height(g.fields[i].View()) + 1
-		}
-		g.viewport.SetYOffset(offset)
 	}
+
+	g.buildView()
 
 	return g, tea.Batch(cmds...)
 }
 
-// height returns the full height of the group
+// height returns the full height of the group.
 func (g *Group) fullHeight() int {
-	var height int
+	height := len(g.fields)
 	for _, f := range g.fields {
-		height += lipgloss.Height(f.View()) + 1 // + gap
+		height += lipgloss.Height(f.View())
 	}
 	return height
 }
 
-// View renders the group.
-func (g *Group) View() string {
+func (g *Group) buildView() {
 	var fields strings.Builder
-	var view strings.Builder
+	offset := 0
+	gap := "\n\n"
 
-	gap := g.theme.FieldSeparator.String()
-	if gap == "" {
-		gap = "\n"
-	}
-
-	for i, field := range g.fields {
-		fields.WriteString(field.View())
-		if i < len(g.fields)-1 {
-			fields.WriteString(gap)
+	// if the focused field is requesting it be zoomed, only show that field.
+	if g.fields[g.paginator.Page].Zoom() {
+		g.fields[g.paginator.Page].WithHeight(g.height - 1)
+		fields.WriteString(g.fields[g.paginator.Page].View())
+	} else {
+		for i, field := range g.fields {
+			fields.WriteString(field.View())
+			if i == g.paginator.Page {
+				offset = lipgloss.Height(fields.String()) - lipgloss.Height(field.View())
+			}
+			if i < len(g.fields)-1 {
+				fields.WriteString(gap)
+			}
 		}
 	}
 
-	errors := g.Errors()
 	g.viewport.SetContent(fields.String() + "\n")
+	g.viewport.SetYOffset(offset)
+}
 
+// View renders the group.
+func (g *Group) View() string {
+	var view strings.Builder
+	view.WriteString(g.viewport.View())
+	view.WriteRune('\n')
+	errors := g.Errors()
 	if g.showHelp && len(errors) <= 0 {
 		view.WriteString(g.help.ShortHelpView(g.fields[g.paginator.Page].KeyBinds()))
 	}
-
-	if !g.showErrors {
-		return g.viewport.View() + "\n" + view.String()
+	if g.showErrors {
+		for _, err := range errors {
+			view.WriteString(ThemeCharm().Focused.ErrorMessage.Render(err.Error()))
+		}
 	}
-
-	for _, err := range errors {
-		view.WriteString(g.theme.Focused.ErrorMessage.Render(err.Error()))
-	}
-
-	return g.viewport.View() + "\n" + view.String()
+	return view.String()
 }

@@ -2,12 +2,16 @@ package huh
 
 import (
 	"errors"
+	"io"
+	"os"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/paginator"
 	tea "github.com/charmbracelet/bubbletea"
 )
+
+const defaultWidth = 80
 
 // FormState represents the current state of the form.
 type FormState int
@@ -54,10 +58,11 @@ type Form struct {
 	aborted  bool
 
 	// options
-	width  int
-	height int
-	theme  *Theme
-	keymap *KeyMap
+	width      int
+	height     int
+	keymap     *KeyMap
+	teaOptions []tea.ProgramOption
+	output     io.Writer
 }
 
 // NewForm returns a form with the given groups and default themes and
@@ -72,20 +77,24 @@ func NewForm(groups ...*Group) *Form {
 	f := &Form{
 		groups:    groups,
 		paginator: p,
-		theme:     ThemeCharm(),
 		keymap:    NewDefaultKeyMap(),
-		width:     0,
-		height:    0,
 		results:   make(map[string]any),
+		teaOptions: []tea.ProgramOption{
+			tea.WithOutput(os.Stderr),
+		},
 	}
 
 	// NB: If dynamic forms come into play this will need to be applied when
 	// groups and fields are added.
-	f.WithTheme(f.theme)
 	f.WithKeyMap(f.keymap)
 	f.WithWidth(f.width)
 	f.WithHeight(f.height)
 	f.UpdateFieldPositions()
+
+	if os.Getenv("TERM") == "dumb" {
+		f.WithWidth(defaultWidth)
+		f.WithAccessible(true)
+	}
 
 	return f
 }
@@ -114,6 +123,10 @@ type Field interface {
 
 	// Skip returns whether this input should be skipped or not.
 	Skip() bool
+
+	// Zoom returns whether this input should be zoomed or not.
+	// Zoom allows the field to take focus of the group / form height.
+	Zoom() bool
 
 	// KeyBinds returns help keybindings.
 	KeyBinds() []key.Binding
@@ -202,10 +215,10 @@ func (f *Form) WithShowHelp(v bool) *Form {
 	return f
 }
 
-// WithShowErrors sets whether or not the form should show help.
+// WithShowErrors sets whether or not the form should show errors.
 //
-// This allows the form groups and field to show what keybindings are available
-// to the user.
+// This allows the form groups and fields to show errors when the Validate
+// function returns an error.
 func (f *Form) WithShowErrors(v bool) *Form {
 	for _, group := range f.groups {
 		group.WithShowErrors(v)
@@ -222,7 +235,6 @@ func (f *Form) WithTheme(theme *Theme) *Form {
 	if theme == nil {
 		return f
 	}
-	f.theme = theme
 	for _, group := range f.groups {
 		group.WithTheme(theme)
 	}
@@ -240,6 +252,7 @@ func (f *Form) WithKeyMap(keymap *KeyMap) *Form {
 	for _, group := range f.groups {
 		group.WithKeyMap(keymap)
 	}
+	f.UpdateFieldPositions()
 	return f
 }
 
@@ -271,6 +284,19 @@ func (f *Form) WithHeight(height int) *Form {
 	return f
 }
 
+// WithOutput sets the io.Writer to output the form.
+func (f *Form) WithOutput(w io.Writer) *Form {
+	f.output = w
+	f.teaOptions = append(f.teaOptions, tea.WithOutput(w))
+	return f
+}
+
+// WithProgramOptions sets the tea options of the form.
+func (f *Form) WithProgramOptions(opts ...tea.ProgramOption) *Form {
+	f.teaOptions = opts
+	return f
+}
+
 // UpdateFieldPositions sets the position on all the fields.
 func (f *Form) UpdateFieldPositions() *Form {
 	firstGroup := 0
@@ -293,12 +319,30 @@ func (f *Form) UpdateFieldPositions() *Form {
 	}
 
 	for g, group := range f.groups {
+		// determine the first non-skippable field.
+		var firstField int
+		for _, field := range group.fields {
+			if !field.Skip() || len(group.fields) == 1 {
+				break
+			}
+			firstField++
+		}
+
+		// determine the last non-skippable field.
+		var lastField int
+		for i := len(group.fields) - 1; i > 0; i-- {
+			lastField = i
+			if !group.fields[i].Skip() || len(group.fields) == 1 {
+				break
+			}
+		}
+
 		for i, field := range group.fields {
 			field.WithPosition(FieldPosition{
 				Group:      g,
 				Field:      i,
-				FirstField: 0,
-				LastField:  len(group.fields) - 1,
+				FirstField: firstField,
+				LastField:  lastField,
 				FirstGroup: firstGroup,
 				LastGroup:  lastGroup,
 			})
@@ -369,13 +413,13 @@ func (f *Form) PrevGroup() tea.Cmd {
 
 // NextField moves the form to the next field.
 func (f *Form) NextField() tea.Cmd {
-	_, cmd := f.Update(nextField())
+	_, cmd := f.Update(NextField())
 	return cmd
 }
 
 // NextField moves the form to the next field.
 func (f *Form) PrevField() tea.Cmd {
-	_, cmd := f.Update(prevField())
+	_, cmd := f.Update(PrevField())
 	return cmd
 }
 
@@ -524,7 +568,7 @@ func (f *Form) Run() error {
 
 // run runs the form in normal mode.
 func (f *Form) run() error {
-	m, err := tea.NewProgram(f).Run()
+	m, err := tea.NewProgram(f, f.teaOptions...).Run()
 	if m.(*Form).aborted {
 		err = ErrUserAborted
 	}
