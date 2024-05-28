@@ -1,22 +1,17 @@
 ---
 output:
-  format: tab
+  formats:
+    - format: tab
 linters-settings:
   misspell:
     locale: US
-  gomnd:
-    settings:
-      mnd:
-        checks: [argument, case, condition, return]
-        ignored-functions: strconv.ParseFloat,rsa.GenerateKey
+
   nolintlint:
     allow-unused: false
-    allow-leading-space: true
     allow-no-explanation: []
     require-explanation: true
     require-specific: true
   gofumpt:
-    lang-version: '1.18'
     extra-rules: true
   godox:
     keywords:
@@ -32,29 +27,49 @@ linters-settings:
       - (API)
       - ^[ ]*@
     capital: true
+  depguard:
+    rules:
+      main:
+        deny:
+          - pkg: 'github.com/sirupsen/logrus'
+            desc: use zerolog
+          - pkg: log
+            desc: use zerolog
+          - pkg: 'github.com/pkg/errors'
+            desc: Should be replaced by standard lib errors package
+
+    # gomodguard:
+    #   blocked:
+    #     modules:
+    #       - github.com/sirupsen/logrus:
+    #           recommendations:
+    #             - internal/logging
+    #           reason: logging is allowed only by zerolog. Please use zerolog
+    #     local_replace_directives: false
   tagliatelle:
     case:
       use-field-name: true
       rules:
-        json: kebab
+        json: snake
         yaml: kebab
         xml: camel
         bson: camel
         avro: snake
         mapstructure: kebab
-    errcheck:
-      check-type-assertions: true
-      check-blank: false
-      ignore: fmt:.*,io/ioutil:^Read.*
-      exclude-functions:
-        - io/ioutil.ReadFile
-        - io.Copy(*bytes.Buffer)
-        - io.Copy(os.Stdout)
-        - io.Closer.Close
-        - io.Closer.Body.Close
+  errcheck:
+    check-type-assertions: false
+    check-blank: false
+    disable-default-exclusions: false
+
+    exclude-functions:
+      - io/ioutil.ReadFile
+      - io.Copy(*bytes.Buffer)
+      - io.Copy(os.Stdout)
+      - io.Closer.Close
+      - io.Closer.Body.Close
+
   govet:
     enable-all: true
-    check-shadowing: true
     disable:
       - fieldalignment
     settings:
@@ -82,18 +97,19 @@ linters-settings:
       - ok
       - zl
       - fs
-    disable:
-      - fieldalignment
+
   revive:
     ignore-generated-header: true
-    enableAllRules: true
-    exclude:
-      - .*_test.go
+    enable-all-rules: true
     rules:
       - name: var-naming
         severity: error
+      - name: line-length-limit
+        severity: warning
+        arguments:
+          - 180
+
 linters:
-  exclude-use-default: false
   enable-all: true
   disable:
     - scopelint
@@ -126,15 +142,13 @@ linters:
     - rowserrcheck # disabled due to generics, can enable in future if needed
     - sqlclosecheck # disabled due to generics, can enable in future if needed
     - wastedassign # disabled due to generics, can enable in future if needed
-    - depguard
+    - funlen #OVERRIDE: ok using for bot, lots of quick long commands i worked on
+    - cyclop #OVERRIDE: ok using for bot, lots of quick long commands i worked on
+    - gocognit #OVERRIDE: ok using for bot, lots of quick long commands i worked on
+    - perfsprint # annoying optimization
+    - gomnd # derepcated, use mnd
 run:
-  skip-dirs-use-default: true
-  skip-dirs:
-    - build
-    - artifacts
-    - _tools
-    - vendor
-    - vendor$
+  timeout: 5m
   build-tags:
     - mage
     - tools
@@ -189,3 +203,12 @@ issues:
         - godot
       text: mocked files do not need to be checked
   whole-files: false
+  exclude-dirs:
+    - build
+    - .artifacts
+    - .cache
+    - artifacts
+    - .trunk
+    - _tools
+    - vendor
+    - vendor$

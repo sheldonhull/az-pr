@@ -248,7 +248,7 @@ func getRemote() (remoteConfig *git.Remote, err error) {
 func getCurrentBranchName() (branchName string, err error) {
 	r, err := git.PlainOpen(".")
 	if err != nil {
-		return "", fmt.Errorf("unable to open git repo: %w", err)
+		return "", fmt.Errorf("unable to open git repo: %w", err) //nolint:revive // revive: ok to leave constant
 	}
 	head, err := r.Head()
 	if err != nil {
@@ -262,12 +262,12 @@ func getUpstreamBranch() (branchName string, err error) {
 	if Debug {
 		pterm.EnableDebugMessages()
 	}
-	r, err := git.PlainOpen(".")
+	repo, err := git.PlainOpen(".") //nolint:revive // revive: ok to leave constant
 	if err != nil {
-		return "", fmt.Errorf("unable to open git repo: %w", err)
+		return "", fmt.Errorf("unable to open git repo: %w", err) //nolint:revive // revive: ok to leave constant
 	}
 
-	head, err := r.Head()
+	head, err := repo.Head()
 	if err != nil {
 		return "", fmt.Errorf("unable to get head from git: %w", err)
 	}
@@ -280,7 +280,7 @@ func getUpstreamBranch() (branchName string, err error) {
 		head.String(),
 		head.Name().Short())
 
-	bl, err := r.Branches()
+	bl, err := repo.Branches()
 	if err != nil {
 		return "", fmt.Errorf("unable to get branches from git: %w", err)
 	}
@@ -341,7 +341,7 @@ func detectSSH() bool {
 	repo, err := git.PlainOpenWithOptions(".", &git.PlainOpenOptions{DetectDotGit: true})
 	if err != nil {
 		pterm.Error.Printfln("error opening repository: %v", err)
-		os.Exit(1)
+		os.Exit(1) //nolint:revive // revive: ok to leave constant
 	}
 
 	// Get the URL of the remote
@@ -379,7 +379,7 @@ func (r *RemoteConfigData) GetURL() (url string) {
 // ProjectName parses the project name out of ssh://git@ssh.dev.azure.com:v3/{org}/{project}/{repo}
 func (r *RemoteConfigData) ProjectName() (project string) {
 	url := r.GetURL()
-	project = strings.Split(url, "/")[5]
+	project = strings.Split(url, "/")[5] //nolint:revive // revive: ok to leave constant
 	pterm.Debug.Printfln("(r *RemoteConfigData) ProjectName(): %s", project)
 	return project
 }
@@ -387,7 +387,7 @@ func (r *RemoteConfigData) ProjectName() (project string) {
 // RepoName parses the repo name out of git@ssh.dev.azure.com:v3/{org}/{project}/{repo}
 func (r *RemoteConfigData) RepoName() (repo string) {
 	url := r.GetURL()
-	repo = strings.Split(url, "/")[6]
+	repo = strings.Split(url, "/")[6] //nolint:revive // revive: ok to leave constant
 	pterm.Debug.Printfln("(r *RemoteConfigData) RepoName(): %s", repo)
 
 	return repo
@@ -396,7 +396,7 @@ func (r *RemoteConfigData) RepoName() (repo string) {
 // OrgName parses the repo name out of git@ssh.dev.azure.com:v3/{org}/{project}/{repo}
 func (r *RemoteConfigData) OrgName() (org string) {
 	url := r.GetURL()
-	org = strings.Split(url, "/")[4]
+	org = strings.Split(url, "/")[4] //nolint:revive // revive: ok to leave constant
 	pterm.Debug.Printfln("(r *RemoteConfigData) OrgName(): %s", org)
 	return org
 }
@@ -517,7 +517,8 @@ func createPR() { //nolint:funlen,cyclop // this is a cli tool, not a library, o
 			associateWorkItemIDargs = append(associateWorkItemIDargs, "--organization", fmt.Sprintf("https://dev.azure.com/%s", remoteData.OrgName()))
 			associateWorkItemIDargs = append(associateWorkItemIDargs, "--repository", remoteData.RepoName())
 			associateWorkItemIDargs = append(associateWorkItemIDargs, "--project", remoteData.ProjectName())
-			associateWorkItemIDargs = append(associateWorkItemIDargs, "--detect", "false") // force it not to try and do autodetection as detect doesn't work with SSH
+			// force it not to try and do autodetection as detect doesn't work with SSH
+			associateWorkItemIDargs = append(associateWorkItemIDargs, "--detect", "false") //nolint:revive // revive: ok to leave constant
 		}
 		pterm.Success.Printf("Work Item IDs: %s\n", workitems)
 		// Argument escaping seems to have issues with spaces in string
