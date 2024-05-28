@@ -13,6 +13,7 @@ type Note struct {
 	// customization
 	title       string
 	description string
+	nextLabel   string
 
 	// state
 	showNextButton bool
@@ -31,8 +32,8 @@ type Note struct {
 func NewNote() *Note {
 	return &Note{
 		showNextButton: false,
-		theme:          ThemeCharm(),
 		skip:           true,
+		nextLabel:      "Next",
 	}
 }
 
@@ -51,6 +52,12 @@ func (n *Note) Description(description string) *Note {
 // Next sets whether to show the next button.
 func (n *Note) Next(show bool) *Note {
 	n.showNextButton = show
+	return n
+}
+
+// NextLabel sets the next button label.
+func (n *Note) NextLabel(label string) *Note {
+	n.nextLabel = label
 	return n
 }
 
@@ -76,6 +83,11 @@ func (n *Note) Skip() bool {
 	return n.skip
 }
 
+// Zoom returns whether the note should be zoomed.
+func (n *Note) Zoom() bool {
+	return false
+}
+
 // KeyBinds returns the help message for the note field.
 func (n *Note) KeyBinds() []key.Binding {
 	return []key.Binding{n.keymap.Prev, n.keymap.Submit, n.keymap.Next}
@@ -92,37 +104,42 @@ func (n *Note) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, n.keymap.Prev):
-			return n, prevField
+			return n, PrevField
 		case key.Matches(msg, n.keymap.Next, n.keymap.Submit):
-			return n, nextField
+			return n, NextField
 		}
-		return n, nextField
+		return n, NextField
 	}
 	return n, nil
 }
 
+func (n *Note) activeStyles() *FieldStyles {
+	theme := n.theme
+	if theme == nil {
+		theme = ThemeCharm()
+	}
+	if n.focused {
+		return &theme.Focused
+	}
+	return &theme.Focused
+}
+
 // View renders the note field.
 func (n *Note) View() string {
-	styles := n.theme.Blurred
-	if n.focused {
-		styles = n.theme.Focused
-	}
-
 	var (
-		sb    strings.Builder
-		title string
+		styles = n.activeStyles()
+		sb     strings.Builder
 	)
 
 	if n.title != "" {
-		title = n.title
+		sb.WriteString(styles.NoteTitle.Render(n.title))
 	}
-	sb.WriteString(styles.NoteTitle.Render(title))
 	if n.description != "" {
 		sb.WriteString("\n")
 		sb.WriteString(render(n.description))
 	}
 	if n.showNextButton {
-		sb.WriteString(styles.Next.Render("Next"))
+		sb.WriteString(styles.Next.Render(n.nextLabel))
 	}
 	return styles.Card.Render(sb.String())
 }
@@ -145,13 +162,16 @@ func (n *Note) runAccessible() error {
 
 	body += n.description
 
-	fmt.Println(n.theme.Blurred.Base.Render(body))
+	fmt.Println(body)
 	fmt.Println()
 	return nil
 }
 
 // WithTheme sets the theme on a note field.
 func (n *Note) WithTheme(theme *Theme) Field {
+	if n.theme != nil {
+		return n
+	}
 	n.theme = theme
 	return n
 }
@@ -214,7 +234,7 @@ func render(input string) string {
 				result.WriteString("\033[3m")
 				italic = true
 			} else {
-				result.WriteString("\033[0m")
+				result.WriteString("\033[23m")
 				italic = false
 			}
 		case '*':
@@ -222,7 +242,7 @@ func render(input string) string {
 				result.WriteString("\033[1m")
 				bold = true
 			} else {
-				result.WriteString("\033[0m")
+				result.WriteString("\033[22m")
 				bold = false
 			}
 		case '`':
@@ -234,6 +254,13 @@ func render(input string) string {
 				result.WriteString(" ")
 				result.WriteString("\033[0m")
 				codeblock = false
+
+				if bold {
+					result.WriteString("\033[1m")
+				}
+				if italic {
+					result.WriteString("\033[3m")
+				}
 			}
 		default:
 			result.WriteRune(char)

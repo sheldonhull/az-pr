@@ -5,7 +5,7 @@
   <br><br>
   <a href="https://github.com/charmbracelet/huh/releases"><img src="https://img.shields.io/github/release/charmbracelet/huh.svg" alt="Latest Release"></a>
   <a href="https://pkg.go.dev/github.com/charmbracelet/huh?tab=doc"><img src="https://godoc.org/github.com/golang/gddo?status.svg" alt="Go Docs"></a>
-  <a href="https://github.com/charmbracelet/huh/actions"><img src="https://github.com/charmbracelet/huh/workflows/build/badge.svg" alt="Build Status"></a>
+  <a href="https://github.com/charmbracelet/huh/actions"><img src="https://github.com/charmbracelet/huh/actions/workflows/build.yml/badge.svg?branch=main" alt="Build Status"></a>
 </p>
 
 A simple, powerful library for building interactive forms and prompts in the terminal.
@@ -29,12 +29,12 @@ package main
 import "github.com/charmbracelet/huh"
 
 var (
-    burger string
-    toppings []string
-    sauceLevel int
-    name string
+    burger       string
+    toppings     []string
+    sauceLevel   int
+    name         string
     instructions string
-    discount bool
+    discount     bool
 )
 ```
 
@@ -322,7 +322,7 @@ fmt.Println("Order up!")
 </table>
 
 For more on Spinners see the [spinner examples](./spinner/examples) and
-[the spinner docs](https://pkg.go.dev/github.com/charmbracelet/huh@main/spinner).
+[the spinner docs](https://pkg.go.dev/github.com/charmbracelet/huh/spinner).
 
 ## What about Bubble Tea?
 
@@ -393,6 +393,16 @@ Tea example][example].
 [tea]: https://github.com/charmbracelet/bubbletea
 [bubbles]: https://github.com/charmbracelet/bubbles
 [example]: https://github.com/charmbracelet/huh/blob/main/examples/bubbletea/main.go
+
+## `Huh?` in the Wild
+For some `Huh?` programs in production, see:
+
+* [glyphs](https://github.com/maaslalani/glyphs): a unicode symbol picker
+* [meteor](https://github.com/stefanlogue/meteor): a highly customisable conventional commit message tool
+* [freeze](https://github.com/charmbracelet/freeze): a tool for generating images of code and terminal output
+* [gum](https://github.com/charmbracelet/gum): a tool for glamorous shell scripts
+* [savvy](https://github.com/getsavvyinc/savvy-cli): the easiest way to create, share, and run runbooks in the terminal
+
 
 ## Feedback
 
