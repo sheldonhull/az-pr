@@ -44,14 +44,8 @@ func setup() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// initCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	cmd := exec.Command("az", "config", "set", "extension.use_dynamic_install=yes_prompt")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		pterm.Error.Printfln("init() az config set extension: %v", err)
-	}
-	pterm.Success.Println("init(): az config set extension.use_dynamic_install=yes_prompt")
-	cmd = exec.Command("az", "extension", "add", "--name", "azure-devops")
+
+	cmd := exec.Command("az", "extension", "add", "--name", "azure-devops")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
