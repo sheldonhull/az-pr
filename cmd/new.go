@@ -515,8 +515,6 @@ func createPR() { //nolint:funlen,cyclop // this is a cli tool, not a library, o
 		}
 		if isSSH {
 			associateWorkItemIDargs = append(associateWorkItemIDargs, "--organization", fmt.Sprintf("https://dev.azure.com/%s", remoteData.OrgName()))
-			associateWorkItemIDargs = append(associateWorkItemIDargs, "--repository", remoteData.RepoName())
-			associateWorkItemIDargs = append(associateWorkItemIDargs, "--project", remoteData.ProjectName())
 			// force it not to try and do autodetection as detect doesn't work with SSH
 			associateWorkItemIDargs = append(associateWorkItemIDargs, "--detect", "false") //nolint:revive // revive: ok to leave constant
 		}
