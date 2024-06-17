@@ -15,7 +15,7 @@ require (
 	github.com/magefile/mage v1.15.0
 	github.com/pterm/pterm v0.12.79
 	github.com/sheldonhull/magetools v1.0.2
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 )
 
 require (
