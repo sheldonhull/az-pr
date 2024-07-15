@@ -1,9 +1,12 @@
 package huh
 
 import (
+	"context"
 	"errors"
 	"io"
 	"os"
+	"sync"
+	"time"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
@@ -12,6 +15,21 @@ import (
 )
 
 const defaultWidth = 80
+
+// Internal ID management. Used during animating to ensure that frame messages
+// are received only by spinner components that sent them.
+var (
+	lastID int
+	idMtx  sync.Mutex
+)
+
+// Return the next ID we should use on the Model.
+func nextID() int {
+	idMtx.Lock()
+	defer idMtx.Unlock()
+	lastID++
+	return lastID
+}
 
 // FormState represents the current state of the form.
 type FormState int
@@ -30,6 +48,12 @@ const (
 // ErrUserAborted is the error returned when a user exits the form before submitting.
 var ErrUserAborted = errors.New("user aborted")
 
+// ErrTimeout is the error returned when the timeout is reached.
+var ErrTimeout = errors.New("timeout")
+
+// ErrTimeoutUnsupported is the error returned when timeout is used while in accessible mode.
+var ErrTimeoutUnsupported = errors.New("timeout is not supported in accessible mode")
+
 // Form is a collection of groups that are displayed one at a time on a "page".
 //
 // The form can navigate between groups and is complete once all the groups are
@@ -44,8 +68,8 @@ type Form struct {
 	paginator paginator.Model
 
 	// callbacks
-	submitCmd tea.Cmd
-	cancelCmd tea.Cmd
+	SubmitCmd tea.Cmd
+	CancelCmd tea.Cmd
 
 	State FormState
 
@@ -61,8 +85,10 @@ type Form struct {
 	width      int
 	height     int
 	keymap     *KeyMap
+	timeout    time.Duration
 	teaOptions []tea.ProgramOption
-	output     io.Writer
+
+	layout Layout
 }
 
 // NewForm returns a form with the given groups and default themes and
@@ -79,6 +105,7 @@ func NewForm(groups ...*Group) *Form {
 		paginator: p,
 		keymap:    NewDefaultKeyMap(),
 		results:   make(map[string]any),
+		layout:    LayoutDefault,
 		teaOptions: []tea.ProgramOption{
 			tea.WithOutput(os.Stderr),
 		},
@@ -267,6 +294,7 @@ func (f *Form) WithWidth(width int) *Form {
 	}
 	f.width = width
 	for _, group := range f.groups {
+		width := f.layout.GroupWidth(f, group, width)
 		group.WithWidth(width)
 	}
 	return f
@@ -286,14 +314,33 @@ func (f *Form) WithHeight(height int) *Form {
 
 // WithOutput sets the io.Writer to output the form.
 func (f *Form) WithOutput(w io.Writer) *Form {
-	f.output = w
 	f.teaOptions = append(f.teaOptions, tea.WithOutput(w))
+	return f
+}
+
+// WithInput sets the io.Reader to the input form.
+func (f *Form) WithInput(r io.Reader) *Form {
+	f.teaOptions = append(f.teaOptions, tea.WithInput(r))
+	return f
+}
+
+// WithTimeout sets the duration for the form to be killed.
+func (f *Form) WithTimeout(t time.Duration) *Form {
+	f.timeout = t
 	return f
 }
 
 // WithProgramOptions sets the tea options of the form.
 func (f *Form) WithProgramOptions(opts ...tea.ProgramOption) *Form {
 	f.teaOptions = opts
+	return f
+}
+
+// WithLayout sets the layout on a form.
+//
+// This allows customization of the form group layout.
+func (f *Form) WithLayout(layout Layout) *Form {
+	f.layout = layout
 	return f
 }
 
@@ -427,6 +474,9 @@ func (f *Form) PrevField() tea.Cmd {
 func (f *Form) Init() tea.Cmd {
 	cmds := make([]tea.Cmd, len(f.groups))
 	for i, group := range f.groups {
+		if i == 0 {
+			group.active = true
+		}
 		cmds[i] = group.Init()
 	}
 
@@ -453,7 +503,8 @@ func (f *Form) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			break
 		}
 		for _, group := range f.groups {
-			group.WithWidth(msg.Width)
+			width := f.layout.GroupWidth(f, group, msg.Width)
+			group.WithWidth(width)
 		}
 		if f.height > 0 {
 			break
@@ -469,7 +520,7 @@ func (f *Form) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			f.aborted = true
 			f.quitting = true
 			f.State = StateAborted
-			return f, f.cancelCmd
+			return f, f.CancelCmd
 		}
 
 	case nextFieldMsg:
@@ -485,7 +536,7 @@ func (f *Form) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		submit := func() (tea.Model, tea.Cmd) {
 			f.quitting = true
 			f.State = StateCompleted
-			return f, f.submitCmd
+			return f, f.SubmitCmd
 		}
 
 		if f.paginator.OnLastPage() {
@@ -503,6 +554,7 @@ func (f *Form) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return submit()
 			}
 		}
+		f.groups[f.paginator.Page].active = true
 		return f, f.groups[f.paginator.Page].Init()
 
 	case prevGroupMsg:
@@ -517,6 +569,7 @@ func (f *Form) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 
+		f.groups[f.paginator.Page].active = true
 		return f, f.groups[f.paginator.Page].Init()
 	}
 
@@ -547,13 +600,18 @@ func (f *Form) View() string {
 		return ""
 	}
 
-	return f.groups[f.paginator.Page].View()
+	return f.layout.View(f)
 }
 
 // Run runs the form.
 func (f *Form) Run() error {
-	f.submitCmd = tea.Quit
-	f.cancelCmd = tea.Quit
+	return f.RunWithContext(context.Background())
+}
+
+// RunWithContext runs the form with the given context.
+func (f *Form) RunWithContext(ctx context.Context) error {
+	f.SubmitCmd = tea.Quit
+	f.CancelCmd = tea.Quit
 
 	if len(f.groups) == 0 {
 		return nil
@@ -563,20 +621,36 @@ func (f *Form) Run() error {
 		return f.runAccessible()
 	}
 
-	return f.run()
+	return f.run(ctx)
 }
 
 // run runs the form in normal mode.
-func (f *Form) run() error {
+func (f *Form) run(ctx context.Context) error {
+	if f.timeout > 0 {
+		ctx, cancel := context.WithTimeout(ctx, f.timeout)
+		defer cancel()
+		f.teaOptions = append(f.teaOptions, tea.WithContext(ctx))
+	} else {
+		f.teaOptions = append(f.teaOptions, tea.WithContext(ctx))
+	}
+
 	m, err := tea.NewProgram(f, f.teaOptions...).Run()
 	if m.(*Form).aborted {
-		err = ErrUserAborted
+		return ErrUserAborted
+	}
+	if errors.Is(err, tea.ErrProgramKilled) {
+		return ErrTimeout
 	}
 	return err
 }
 
 // runAccessible runs the form in accessible mode.
 func (f *Form) runAccessible() error {
+	// Timeouts are not supported in this mode.
+	if f.timeout > 0 {
+		return ErrTimeoutUnsupported
+	}
+
 	for _, group := range f.groups {
 		for _, field := range group.fields {
 			field.Init()
