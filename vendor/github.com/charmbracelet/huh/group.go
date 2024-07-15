@@ -5,6 +5,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/paginator"
+	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -40,6 +41,7 @@ type Group struct {
 	height int
 	keymap *KeyMap
 	hide   func() bool
+	active bool
 }
 
 // NewGroup returns a new group with the given fields.
@@ -53,6 +55,7 @@ func NewGroup(fields ...Field) *Group {
 		help:       help.New(),
 		showHelp:   true,
 		showErrors: true,
+		active:     false,
 	}
 
 	height := group.fullHeight()
@@ -155,6 +158,13 @@ func (g *Group) Errors() []error {
 	return errs
 }
 
+// updateFieldMsg is a message to update the fields of a group that is currently
+// displayed.
+//
+// This is used to update all TitleFunc, DescriptionFunc, and ...Func update
+// methods to make all fields dynamically update based on user input.
+type updateFieldMsg struct{}
+
 // nextFieldMsg is a message to move to the next field,
 //
 // each field controls when to send this message such that it is able to use
@@ -190,8 +200,10 @@ func (g *Group) Init() tea.Cmd {
 		return tea.Batch(cmds...)
 	}
 
-	cmd := g.fields[g.paginator.Page].Focus()
-	cmds = append(cmds, cmd)
+	if g.active {
+		cmd := g.fields[g.paginator.Page].Focus()
+		cmds = append(cmds, cmd)
+	}
 	g.buildView()
 	return tea.Batch(cmds...)
 }
@@ -234,9 +246,29 @@ func (g *Group) prevField() []tea.Cmd {
 func (g *Group) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
-	m, cmd := g.fields[g.paginator.Page].Update(msg)
-	g.fields[g.paginator.Page] = m.(Field)
-	cmds = append(cmds, cmd)
+	// Update all the fields in the group.
+	for i := range g.fields {
+		switch msg := msg.(type) {
+		case spinner.TickMsg,
+			updateTitleMsg,
+			updateDescriptionMsg,
+			updateSuggestionsMsg,
+			updateOptionsMsg[string],
+			updatePlaceholderMsg:
+			m, cmd := g.fields[i].Update(msg)
+			g.fields[i] = m.(Field)
+			cmds = append(cmds, cmd)
+		}
+		var _msg tea.Msg
+		if g.paginator.Page == i {
+			_msg = msg
+		} else {
+			_msg = updateFieldMsg{}
+		}
+		m, cmd := g.fields[i].Update(_msg)
+		g.fields[i] = m.(Field)
+		cmds = append(cmds, cmd)
+	}
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -261,7 +293,7 @@ func (g *Group) fullHeight() int {
 	return height
 }
 
-func (g *Group) buildView() {
+func (g *Group) getContent() (int, string) {
 	var fields strings.Builder
 	offset := 0
 	gap := "\n\n"
@@ -282,7 +314,13 @@ func (g *Group) buildView() {
 		}
 	}
 
-	g.viewport.SetContent(fields.String() + "\n")
+	return offset, fields.String() + "\n"
+}
+
+func (g *Group) buildView() {
+	offset, content := g.getContent()
+
+	g.viewport.SetContent(content)
 	g.viewport.SetYOffset(offset)
 }
 
@@ -290,6 +328,19 @@ func (g *Group) buildView() {
 func (g *Group) View() string {
 	var view strings.Builder
 	view.WriteString(g.viewport.View())
+	view.WriteString(g.Footer())
+	return view.String()
+}
+
+// Content renders the group's content only (no footer).
+func (g *Group) Content() string {
+	_, content := g.getContent()
+	return content
+}
+
+// Footer renders the group's footer only (no content).
+func (g *Group) Footer() string {
+	var view strings.Builder
 	view.WriteRune('\n')
 	errors := g.Errors()
 	if g.showHelp && len(errors) <= 0 {

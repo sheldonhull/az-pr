@@ -77,14 +77,15 @@ github.com/charmbracelet/bubbles/help
 github.com/charmbracelet/bubbles/key
 github.com/charmbracelet/bubbles/paginator
 github.com/charmbracelet/bubbles/runeutil
+github.com/charmbracelet/bubbles/spinner
 github.com/charmbracelet/bubbles/textarea
 github.com/charmbracelet/bubbles/textarea/memoization
 github.com/charmbracelet/bubbles/textinput
 github.com/charmbracelet/bubbles/viewport
-# github.com/charmbracelet/bubbletea v0.26.3
+# github.com/charmbracelet/bubbletea v0.26.4
 ## explicit; go 1.18
 github.com/charmbracelet/bubbletea
-# github.com/charmbracelet/huh v0.4.2
+# github.com/charmbracelet/huh v0.5.1
 ## explicit; go 1.18
 github.com/charmbracelet/huh
 github.com/charmbracelet/huh/accessibility
@@ -95,10 +96,10 @@ github.com/charmbracelet/lipgloss
 ## explicit; go 1.18
 github.com/charmbracelet/x/ansi
 github.com/charmbracelet/x/ansi/parser
-# github.com/charmbracelet/x/exp/strings v0.0.0-20240528170637-6f71142750d6
+# github.com/charmbracelet/x/exp/strings v0.0.0-20240617190524-788ec55faed1
 ## explicit; go 1.19
 github.com/charmbracelet/x/exp/strings
-# github.com/charmbracelet/x/input v0.1.1
+# github.com/charmbracelet/x/input v0.1.2
 ## explicit; go 1.18
 github.com/charmbracelet/x/input
 # github.com/charmbracelet/x/term v0.1.1
@@ -267,6 +268,9 @@ github.com/mattn/go-tty
 # github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
 ## explicit
 github.com/mgutz/ansi
+# github.com/mitchellh/hashstructure/v2 v2.0.2
+## explicit; go 1.14
+github.com/mitchellh/hashstructure/v2
 # github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6
 ## explicit; go 1.17
 github.com/muesli/ansi
@@ -353,7 +357,7 @@ golang.org/x/net/proxy
 # golang.org/x/sync v0.7.0
 ## explicit; go 1.18
 golang.org/x/sync/errgroup
-# golang.org/x/sys v0.20.0
+# golang.org/x/sys v0.21.0
 ## explicit; go 1.18
 golang.org/x/sys/cpu
 golang.org/x/sys/execabs
@@ -363,7 +367,7 @@ golang.org/x/sys/windows
 # golang.org/x/term v0.20.0
 ## explicit; go 1.18
 golang.org/x/term
-# golang.org/x/text v0.15.0
+# golang.org/x/text v0.16.0
 ## explicit; go 1.18
 golang.org/x/text/cases
 golang.org/x/text/internal
@@ -375,8 +379,6 @@ golang.org/x/text/runes
 golang.org/x/text/transform
 golang.org/x/text/unicode/norm
 golang.org/x/text/width
-# golang.org/x/tools v0.21.0
-## explicit; go 1.19
 # gopkg.in/warnings.v0 v0.1.2
 ## explicit
 gopkg.in/warnings.v0
