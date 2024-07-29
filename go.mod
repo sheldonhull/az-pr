@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
-	github.com/alessio/shellescape v1.4.2
+	github.com/alessio/shellescape v1.5.0
 	github.com/bitfield/script v0.22.1
 	github.com/brianstrauch/cobra-shell v0.5.0
 	github.com/c-bata/go-prompt v0.2.6
@@ -39,7 +39,7 @@ require (
 	github.com/ProtonMail/go-crypto v1.0.0 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
-	github.com/charmbracelet/huh v0.5.1
+	github.com/charmbracelet/huh v0.5.2
 	github.com/charmbracelet/lipgloss v0.11.0 // indirect
 	github.com/cloudflare/circl v1.3.8 // indirect
 	github.com/containerd/console v1.0.4 // indirect
