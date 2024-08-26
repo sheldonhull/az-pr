@@ -8,7 +8,7 @@ require (
 	github.com/bitfield/script v0.22.1
 	github.com/brianstrauch/cobra-shell v0.5.0
 	github.com/c-bata/go-prompt v0.2.6
-	github.com/charmbracelet/bubbles v0.18.0
+	github.com/charmbracelet/bubbles v0.19.0
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
 	github.com/ivanpirog/coloredcobra v1.0.1
@@ -39,7 +39,7 @@ require (
 	github.com/ProtonMail/go-crypto v1.0.0 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
-	github.com/charmbracelet/huh v0.5.2
+	github.com/charmbracelet/huh v0.5.3
 	github.com/charmbracelet/lipgloss v0.11.0 // indirect
 	github.com/cloudflare/circl v1.3.8 // indirect
 	github.com/containerd/console v1.0.4 // indirect
