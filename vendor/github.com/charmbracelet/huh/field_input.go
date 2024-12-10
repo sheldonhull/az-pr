@@ -36,7 +36,7 @@ type Input struct {
 
 	accessible bool
 	width      int
-	height     int
+	height     int // not really used anywhere
 
 	theme  *Theme
 	keymap InputKeyMap
@@ -273,10 +273,6 @@ func (i *Input) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 	var cmd tea.Cmd
 
-	i.textinput, cmd = i.textinput.Update(msg)
-	cmds = append(cmds, cmd)
-	i.accessor.Set(i.textinput.Value())
-
 	switch msg := msg.(type) {
 	case updateFieldMsg:
 		var cmds []tea.Cmd
@@ -361,6 +357,10 @@ func (i *Input) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, NextField)
 		}
 	}
+
+	i.textinput, cmd = i.textinput.Update(msg)
+	cmds = append(cmds, cmd)
+	i.accessor.Set(i.textinput.Value())
 
 	return i, tea.Batch(cmds...)
 }

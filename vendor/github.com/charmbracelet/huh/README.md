@@ -126,7 +126,7 @@ And that’s it! For more info see [the full source][burgersource] for this
 example as well as [the docs][docs].
 
 If you need more dynamic forms that change based on input from previous fields,
-check out the [dynamic forms](#dynamic) example.
+check out the [dynamic forms](#dynamic-forms) example.
 
 [burgersource]: ./examples/burger/main.go
 [docs]: https://pkg.go.dev/github.com/charmbracelet/huh?tab=doc
@@ -280,7 +280,7 @@ Themes can take advantage of the full range of
 
 [lipgloss]: https://github.com/charmbracelet/lipgloss
 
-## Dynamic
+## Dynamic Forms
 
 `huh?` forms can be as dynamic as your heart desires. Simply replace properties
 with their equivalent `Func` to recompute the properties value every time a

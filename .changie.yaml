@@ -12,22 +12,31 @@ body:
   block: true
 kinds:
   - label: 🤖 CI & Build
+    key: ci-and-build
     auto: patch
   - label: 🎉 Feature
+    key: feature
     auto: minor
   - label: ⬇️ Deprecated
+    key: deprecated
     auto: minor
   - label: 🔨 Refactor
+    key: refactor
     auto: patch
   - label: 🐛 Bug Fix
+    key: bug-fix
     auto: patch
   - label: 🔥 Breaking Change
+    key: breaking-change
     auto: minor
   - label: 🔒 Security
+    key: security
     auto: patch
   - label: ⬆️ Dependencies
+    key: dependencies
     auto: patch
   - label: 🔥 Major Version Change (Breaking Changes)
+    key: major-version-change-breaking-changes
     auto: major
 newlines:
   afterChange: 0
