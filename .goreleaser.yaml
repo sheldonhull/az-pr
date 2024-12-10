@@ -57,7 +57,7 @@ archives:
         format: zip
 
 changelog:
-  disable: true
+  disable: false
 sboms:
   - artifacts: archive
 release:
