@@ -36,6 +36,8 @@ const cacheDirectory = ".cache"
 
 const permissionUserReadWriteExecute = 0o0777
 
+var artifactLocalFile = filepath.Join(artifactDirectory, "goreleaser", "az-pr_darwin_arm64_v8.0", "az-pr")
+
 // 📁 createDirectories creates the local working directories for build artifacts and tooling.
 func createDirectories() error {
 	for _, dir := range []string{artifactDirectory, cacheDirectory} {
@@ -94,15 +96,15 @@ func Clean() {
 	mg.Deps(createDirectories)
 }
 
-// Release using github cli (for now)
-func Release() error {
-	version, changelogFile, err := getVersion()
-	if err != nil {
-		pterm.Error.Printfln("failed to get version: %v", err)
-		return err
-	}
-	return sh.Run("gh", "release", "create", version, "--title", version, "--notes-file", changelogFile, "--target", "main")
-}
+// // Release using github cli (for now)
+// func Release() error {
+// 	version, changelogFile, err := getVersion()
+// 	if err != nil {
+// 		pterm.Error.Printfln("failed to get version: %v", err)
+// 		return err
+// 	}
+// 	return sh.Run("gh", "release", "create", version, "--title", version, "--notes-file", changelogFile, "--target", "main")
+// }
 
 // getVersion returns the version and path for the changefile to use for the semver and release notes.
 func getVersion() (releaseVersion, cleanPath string, err error) {
@@ -122,14 +124,17 @@ func getVersion() (releaseVersion, cleanPath string, err error) {
 // ⚙ Run builds the binary into the local artifact direction and launches for testing.
 func Run() error {
 	start := time.Now()
+
 	defer func() {
 		duration := durafmt.Parse(time.Since(start))
 		pterm.Success.Printfln("✅ Run() took %s", duration)
 	}()
-	targetBuildFile := filepath.Join(artifactDirectory, "az-pr")
-	if err := sh.RunV("go", "build", "-o", targetBuildFile, "main.go"); err != nil {
-		return err
-	}
+	mg.SerialDeps(Build)
+
+	targetBuildFile := artifactLocalFile
+	// if err := sh.RunV("go", "build", "-o", targetBuildFile, "main.go"); err != nil {
+	// 	return err
+	// }
 	return sh.RunV(targetBuildFile, "shell", "--debug")
 }
 
@@ -147,16 +152,18 @@ func (Install) Local() error {
 		duration := durafmt.Parse(time.Since(start))
 		pterm.Success.Printfln("✅ Run() took %s", duration)
 	}()
-	targetBuildFile := filepath.Join(artifactDirectory, "az-pr")
+	mg.SerialDeps(Build)
+
+	targetBuildFile := artifactLocalFile
 
 	gopath := os.Getenv("GOPATH")
 	if gopath == "" {
 		gopath = build.Default.GOPATH
 	}
 	targetLocalBinaryPath := filepath.Join(gopath, "bin", "az-pr")
-	if err := sh.RunV("go", "build", "-o", targetBuildFile, "main.go"); err != nil {
-		return fmt.Errorf("failed to build: %w", err)
-	}
+	// if err := sh.RunV("go", "build", "-o", targetBuildFile, "main.go"); err != nil {
+	// 	return fmt.Errorf("failed to build: %w", err)
+	// }
 	pterm.Info.Printfln("binary: %s", targetBuildFile)
 	if err := sh.Copy(targetLocalBinaryPath, targetBuildFile); err != nil {
 		return fmt.Errorf("failed to cp %s %s to: %w", targetBuildFile, targetLocalBinaryPath, err)

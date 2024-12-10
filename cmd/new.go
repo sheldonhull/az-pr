@@ -109,7 +109,7 @@ func emojify(commitTypeString string) string {
 }
 
 var (
-	commit, scope      string
+	scope              string
 	title, description string
 	confirm            bool
 )

@@ -60,7 +60,7 @@ newlines:
   beforeKind: 0
   beforeVersion: 0
   endOfVersion: 0
-replacements:
-  - path: 'cmd/version.go'
-    find: 'var version string = ".*"'
-    replace: 'var version string = "{{.Version}}"'
+# replacements:
+#   - path: 'cmd/version.go'
+#     find: 'var version string = ".*"'
+#     replace: 'var version string = "{{.Version}}"'

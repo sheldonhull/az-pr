@@ -1,12 +1,15 @@
 module github.com/sheldonhull/az-pr
 
-go 1.21
+go 1.22
+
+toolchain go1.23.4
 
 require (
 	al.essio.dev/pkg/shellescape v1.5.1
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/bitfield/script v0.24.0
 	github.com/brianstrauch/cobra-shell v0.5.0
+	github.com/brianvoe/gofakeit/v7 v7.1.2
 	github.com/c-bata/go-prompt v0.2.6
 	github.com/charmbracelet/bubbles v0.20.0
 	github.com/go-git/go-git/v5 v5.12.0
