@@ -387,7 +387,6 @@ FixedWidth(co *FixedWidthOptions) (string, error)
 
 ### Product
 
-
 ```go
 Product() *ProductInfo
 ProductName() string
@@ -865,4 +864,13 @@ ErrorRuntime() error
 
 ```go
 School() string
+```
+
+### Song
+
+```go
+Song() *SongInfo
+SongName() string
+SongArtist() string
+SongGenre() string
 ```
