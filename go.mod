@@ -2,7 +2,7 @@ module github.com/sheldonhull/az-pr
 
 go 1.22
 
-toolchain go1.23.6
+toolchain go1.24.0
 
 require (
 	al.essio.dev/pkg/shellescape v1.5.1
@@ -18,7 +18,7 @@ require (
 	github.com/magefile/mage v1.15.0
 	github.com/pterm/pterm v0.12.80
 	github.com/sheldonhull/magetools v1.0.2
-	github.com/spf13/cobra v1.8.1
+	github.com/spf13/cobra v1.9.1
 )
 
 require (
@@ -75,7 +75,7 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/skeema/knownhosts v1.3.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/ztrue/tracerr v0.4.0 // indirect
