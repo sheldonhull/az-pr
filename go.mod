@@ -7,7 +7,7 @@ toolchain go1.24.1
 require (
 	al.essio.dev/pkg/shellescape v1.6.0
 	github.com/AlecAivazis/survey/v2 v2.3.7
-	github.com/bitfield/script v0.24.0
+	github.com/bitfield/script v0.24.1
 	github.com/brianstrauch/cobra-shell v0.5.0
 	github.com/brianvoe/gofakeit/v7 v7.2.1
 	github.com/c-bata/go-prompt v0.2.6
