@@ -259,9 +259,39 @@ Let's try it out with some [sample data](testdata/access.log):
  1 90.53.111.17
 ```
 
+# A `script` “interpreter”
+
+One of the nice things about shell scripts is that there's no build process: the script file itself is the “executable” (in fact, it's interpreted by the shell). Simon Willison (and GPT-4) contributed this elegant `script` interpreter, written in `bash`:
+
+* [`go-script`](https://til.simonwillison.net/bash/go-script)
+
+With `go-script`, you can run `script` one-liners directly:
+
+```sh
+cat file.txt | ./goscript.sh -c 'script.Stdin().Column(1).Freq().First(10).Stdout()'
+```
+
+or create `.goscript` files that you can run using a “shebang” line:
+
+```sh
+#!/tmp/goscript.sh
+script.Stdin().Column(1).Freq().First(10).Stdout()
+```
+
 # Documentation
 
 See [pkg.go.dev](https://pkg.go.dev/github.com/bitfield/script) for the full documentation, or read on for a summary.
+
+[![The Power of Go: Tools cover image](img/tools.png)](https://bitfieldconsulting.com/books/tools)
+
+The `script` package originated as an exercise in my book [The Power of Go: Tools](https://bitfieldconsulting.com/books/tools):
+
+> *Not all software engineering is about writing applications. Developers also need tooling: programs and services to automate everyday tasks like configuring servers and containers, running builds and tests, deploying their applications, and so on. Why shouldn't we be able to use Go for that purpose, too?*
+>
+> *`script` is designed to make it easy to write Go programs that chain together operations into a pipeline, in the same way that shell scripts do, but with the robust type checking and error handling of a real programming language. You can use `script` to construct the sort of simple one‐off pipelines that would otherwise require the shell, or special‐purpose tools.*
+>
+> *So, when plain Go doesn’t provide a convenient way to solve a problem, you yourself can use it to implement a domain-specific “language” that does. In this case, we used Go to provide the language of Unix‐style pipelines. But we could have chosen any architecture we wanted to suit the problem. If Go doesn’t already provide the tool you need, use Go to build that tool, then use it.*\
+> —From the book
 
 ## Sources
 
@@ -353,6 +383,7 @@ Sinks are methods that return some data from a pipe, ending the pipeline and ext
 
 | Version | New |
 | ----------- | ------- |
+| 0.24.1  | [`JQ`](https://pkg.go.dev/github.com/bitfield/script#Pipe.JQ) accepts JSONLines data |
 | 0.24.0  | [`Hash`](https://pkg.go.dev/github.com/bitfield/script#Pipe.Hash) |
 |         | [`HashSums`](https://pkg.go.dev/github.com/bitfield/script#Pipe.HashSums) |
 | 0.23.0  | [`WithEnv`](https://pkg.go.dev/github.com/bitfield/script#Pipe.WithEnv) |
