@@ -27,7 +27,7 @@ github.com/Microsoft/go-winio/internal/fs
 github.com/Microsoft/go-winio/internal/socket
 github.com/Microsoft/go-winio/internal/stringbuffer
 github.com/Microsoft/go-winio/pkg/guid
-# github.com/ProtonMail/go-crypto v1.1.5
+# github.com/ProtonMail/go-crypto v1.1.6
 ## explicit; go 1.17
 github.com/ProtonMail/go-crypto/bitcurves
 github.com/ProtonMail/go-crypto/brainpool
@@ -63,7 +63,7 @@ github.com/bitfield/script
 # github.com/brianstrauch/cobra-shell v0.5.0
 ## explicit; go 1.17
 github.com/brianstrauch/cobra-shell
-# github.com/brianvoe/gofakeit/v7 v7.2.1
+# github.com/brianvoe/gofakeit/v7 v7.3.0
 ## explicit; go 1.22
 github.com/brianvoe/gofakeit/v7
 github.com/brianvoe/gofakeit/v7/data
@@ -78,8 +78,8 @@ github.com/c-bata/go-prompt/internal/term
 # github.com/catppuccin/go v0.2.0
 ## explicit; go 1.19
 github.com/catppuccin/go
-# github.com/charmbracelet/bubbles v0.20.0
-## explicit; go 1.18
+# github.com/charmbracelet/bubbles v0.21.0
+## explicit; go 1.23.0
 github.com/charmbracelet/bubbles/cursor
 github.com/charmbracelet/bubbles/filepicker
 github.com/charmbracelet/bubbles/help
@@ -90,25 +90,32 @@ github.com/charmbracelet/bubbles/textarea
 github.com/charmbracelet/bubbles/textarea/memoization
 github.com/charmbracelet/bubbles/textinput
 github.com/charmbracelet/bubbles/viewport
-# github.com/charmbracelet/bubbletea v1.1.0
+# github.com/charmbracelet/bubbletea v1.3.4
 ## explicit; go 1.18
 github.com/charmbracelet/bubbletea
+# github.com/charmbracelet/colorprofile v0.2.3-0.20250311203215-f60798e515dc
+## explicit; go 1.18
+github.com/charmbracelet/colorprofile
 # github.com/charmbracelet/huh v0.6.0
 ## explicit; go 1.21
 github.com/charmbracelet/huh
 github.com/charmbracelet/huh/accessibility
 github.com/charmbracelet/huh/internal/selector
-# github.com/charmbracelet/lipgloss v0.13.0
+# github.com/charmbracelet/lipgloss v1.1.0
 ## explicit; go 1.18
 github.com/charmbracelet/lipgloss
-# github.com/charmbracelet/x/ansi v0.2.3
+# github.com/charmbracelet/x/ansi v0.8.0
 ## explicit; go 1.18
 github.com/charmbracelet/x/ansi
+github.com/charmbracelet/x/ansi/kitty
 github.com/charmbracelet/x/ansi/parser
+# github.com/charmbracelet/x/cellbuf v0.0.13-0.20250311204145-2c3ea96c31dd
+## explicit; go 1.18
+github.com/charmbracelet/x/cellbuf
 # github.com/charmbracelet/x/exp/strings v0.0.0-20240722160745-212f7b056ed0
 ## explicit; go 1.19
 github.com/charmbracelet/x/exp/strings
-# github.com/charmbracelet/x/term v0.2.0
+# github.com/charmbracelet/x/term v0.2.1
 ## explicit; go 1.18
 github.com/charmbracelet/x/term
 # github.com/cloudflare/circl v1.6.1
@@ -162,7 +169,7 @@ github.com/go-git/go-billy/v5/helper/polyfill
 github.com/go-git/go-billy/v5/memfs
 github.com/go-git/go-billy/v5/osfs
 github.com/go-git/go-billy/v5/util
-# github.com/go-git/go-git/v5 v5.14.0
+# github.com/go-git/go-git/v5 v5.16.2
 ## explicit; go 1.23.0
 github.com/go-git/go-git/v5
 github.com/go-git/go-git/v5/config
@@ -281,7 +288,7 @@ github.com/muesli/ansi/compressor
 # github.com/muesli/cancelreader v0.2.2
 ## explicit; go 1.17
 github.com/muesli/cancelreader
-# github.com/muesli/termenv v0.15.3-0.20240618155329-98d742f6907a
+# github.com/muesli/termenv v0.16.0
 ## explicit; go 1.17
 github.com/muesli/termenv
 # github.com/pjbgf/sha1cd v0.3.2
@@ -329,7 +336,7 @@ github.com/xo/terminfo
 # github.com/ztrue/tracerr v0.4.0
 ## explicit
 github.com/ztrue/tracerr
-# golang.org/x/crypto v0.36.0
+# golang.org/x/crypto v0.37.0
 ## explicit; go 1.23.0
 golang.org/x/crypto/argon2
 golang.org/x/crypto/blake2b
@@ -353,7 +360,7 @@ golang.org/x/mod/internal/lazyregexp
 golang.org/x/mod/modfile
 golang.org/x/mod/module
 golang.org/x/mod/semver
-# golang.org/x/net v0.38.0
+# golang.org/x/net v0.39.0
 ## explicit; go 1.23.0
 golang.org/x/net/context
 golang.org/x/net/internal/socks
