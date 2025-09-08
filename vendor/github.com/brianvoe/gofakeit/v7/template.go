@@ -342,6 +342,12 @@ func addTemplateLookup() {
 Markus Moen`,
 		Output:      "string",
 		ContentType: "text/plain",
+		Aliases: []string{
+			"document template", "layout", "blueprint", "design pattern", "text template", "generator", "format schema",
+		},
+		Keywords: []string{
+			"template", "generates", "format", "structure", "engine", "document", "pattern", "design", "syntax", "render", "compile",
+		},
 		Params: []Param{
 			{Field: "template", Display: "Template", Type: "string", Description: "Golang template to generate the document from"},
 			{Field: "data", Display: "Custom Data", Type: "string", Default: "", Optional: true, Description: "Custom data to pass to the template"},
@@ -397,6 +403,12 @@ print("purplesheep5 result:", "in progress")
 ## License
 MIT`,
 		Output: "string",
+		Aliases: []string{
+			"markup language", "readme format", "lightweight markup", "documentation style", "plain text format", "md file", "doc format",
+		},
+		Keywords: []string{
+			"markdown", "markup", "language", "formatting", "plain", "text", "documentation", "lightweight", "syntax", "rendering", "structure", "readme",
+		},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			template_result, err := templateFunc(templateMarkdown, templateFuncMap(f, nil), &MarkdownOptions{})
 			return string(template_result), err
@@ -432,6 +444,19 @@ Milford Johnston
 jamelhaag@king.org
 (507)096-3058`,
 		Output: "string",
+		Aliases: []string{
+			"email body",
+			"email text",
+			"email message",
+			"message body",
+			"email content",
+		},
+		Keywords: []string{
+			"email", "body", "message", "content",
+			"subject", "salutation", "greeting", "closing",
+			"signature", "footer", "paragraph", "plaintext",
+			"correspondence", "communication",
+		},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			template_result, err := templateFunc(templateEmail, templateFuncMap(f, nil), &EmailOptions{})
 			return string(template_result), err

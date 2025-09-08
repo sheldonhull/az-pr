@@ -135,6 +135,8 @@ func addMiscLookup() {
 		Description: "128-bit identifier used to uniquely identify objects or entities in computer systems",
 		Example:     "590c1440-9888-45b0-bd51-a817ee07c3f2",
 		Output:      "string",
+		Aliases:     []string{"identifier", "unique", "guid", "id", "128-bit"},
+		Keywords:    []string{"uuid", "computer", "system", "objects", "entities", "identify", "version", "hexadecimal"},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			return uuid(f), nil
 		},
@@ -146,6 +148,8 @@ func addMiscLookup() {
 		Description: "Data type that represents one of two possible values, typically true or false",
 		Example:     "true",
 		Output:      "bool",
+		Aliases:     []string{"boolean", "true", "false", "logic", "binary"},
+		Keywords:    []string{"bool", "data", "type", "represents", "values", "typically", "two", "possible"},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			return boolFunc(f), nil
 		},
@@ -157,6 +161,8 @@ func addMiscLookup() {
 		Description: "Decision-making method involving the tossing of a coin to determine outcomes",
 		Example:     "Tails",
 		Output:      "string",
+		Aliases:     []string{"coin", "flip", "heads", "tails", "decision", "random"},
+		Keywords:    []string{"decision-making", "method", "tossing", "determine", "outcomes", "chance", "probability"},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			return flipACoin(f), nil
 		},

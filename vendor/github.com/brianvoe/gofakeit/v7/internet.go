@@ -268,6 +268,8 @@ func addInternetLookup() {
 		Description: "Web address that specifies the location of a resource on the internet",
 		Example:     "http://www.principalproductize.biz/target",
 		Output:      "string",
+		Aliases:     []string{"url string", "web address", "internet link", "website url", "resource locator"},
+		Keywords:    []string{"url", "web", "address", "http", "https", "www", "protocol", "scheme", "path", "domain", "location", "resource"},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			return url(f), nil
 		},
@@ -279,6 +281,8 @@ func addInternetLookup() {
 		Description: "Human-readable web address used to identify websites on the internet",
 		Example:     "centraltarget.biz",
 		Output:      "string",
+		Aliases:     []string{"domain name", "website name", "internet domain", "dns name", "site domain"},
+		Keywords:    []string{"domain", "name", "web", "address", "dns", "hostname", "resolve", "centraltarget", "biz", "website"},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			return domainName(f), nil
 		},
@@ -290,6 +294,8 @@ func addInternetLookup() {
 		Description: "The part of a domain name that comes after the last dot, indicating its type or purpose",
 		Example:     "org",
 		Output:      "string",
+		Aliases:     []string{"domain suffix", "domain extension", "top level domain", "domain ending"},
+		Keywords:    []string{"domain", "suffix", "tld", "top-level", "extension", "org", "com", "net", "gov", "edu", "mil", "int"},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			return domainSuffix(f), nil
 		},
@@ -301,6 +307,8 @@ func addInternetLookup() {
 		Description: "Numerical label assigned to devices on a network for identification and communication",
 		Example:     "222.83.191.222",
 		Output:      "string",
+		Aliases:     []string{"ip address", "network address", "internet address", "device ip", "ipv4 label"},
+		Keywords:    []string{"ipv4", "address", "ip", "network", "internet", "protocol", "communication", "dotted", "decimal"},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			return ipv4Address(f), nil
 		},
@@ -312,6 +320,8 @@ func addInternetLookup() {
 		Description: "Numerical label assigned to devices on a network, providing a larger address space than IPv4 for internet communication",
 		Example:     "2001:cafe:8898:ee17:bc35:9064:5866:d019",
 		Output:      "string",
+		Aliases:     []string{"ip address", "network address", "internet address", "hex ip", "ipv6 label"},
+		Keywords:    []string{"ipv6", "address", "ip", "network", "protocol", "hexadecimal", "identification"},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			return ipv6Address(f), nil
 		},
@@ -323,6 +333,8 @@ func addInternetLookup() {
 		Description: "Verb used in HTTP requests to specify the desired action to be performed on a resource",
 		Example:     "HEAD",
 		Output:      "string",
+		Aliases:     []string{"http verb", "http action", "http request", "http command", "method name"},
+		Keywords:    []string{"http", "method", "verb", "get", "post", "put", "delete", "patch", "options", "head", "request", "action"},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			return httpMethod(f), nil
 		},
@@ -334,6 +346,8 @@ func addInternetLookup() {
 		Description: "Classification used in logging to indicate the severity or priority of a log entry",
 		Example:     "error",
 		Output:      "string",
+		Aliases:     []string{"log severity", "logging level", "log classification", "priority level", "event level"},
+		Keywords:    []string{"log", "level", "severity", "priority", "classification", "error", "warn", "info", "debug", "trace", "fatal", "critical"},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			return logLevel(f, ""), nil
 		},
@@ -345,6 +359,8 @@ func addInternetLookup() {
 		Description: "String sent by a web browser to identify itself when requesting web content",
 		Example:     "Mozilla/5.0 (Windows NT 5.0) AppleWebKit/5362 (KHTML, like Gecko) Chrome/37.0.834.0 Mobile Safari/5362",
 		Output:      "string",
+		Aliases:     []string{"ua string", "browser ua", "http user agent", "client identifier", "browser identifier"},
+		Keywords:    []string{"useragent", "browser", "http", "request", "mozilla", "applewebkit", "chrome", "firefox", "safari", "opera", "mobile"},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			return userAgent(f), nil
 		},
@@ -356,6 +372,8 @@ func addInternetLookup() {
 		Description: "The specific identification string sent by the Google Chrome web browser when making requests on the internet",
 		Example:     "Mozilla/5.0 (X11; Linux i686) AppleWebKit/5312 (KHTML, like Gecko) Chrome/39.0.836.0 Mobile Safari/5312",
 		Output:      "string",
+		Aliases:     []string{"chrome ua", "chrome browser ua", "google chrome ua", "chrome identifier", "chrome user agent"},
+		Keywords:    []string{"chrome", "google", "browser", "ua", "useragent", "applewebkit", "khtml", "gecko", "safari", "version"},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			return chromeUserAgent(f), nil
 		},
@@ -367,6 +385,8 @@ func addInternetLookup() {
 		Description: "The specific identification string sent by the Firefox web browser when making requests on the internet",
 		Example:     "Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_8_3 rv:7.0) Gecko/1900-07-01 Firefox/37.0",
 		Output:      "string",
+		Aliases:     []string{"firefox ua", "firefox browser ua", "mozilla firefox ua", "gecko ua", "firefox identifier"},
+		Keywords:    []string{"firefox", "mozilla", "browser", "ua", "useragent", "gecko", "macintosh", "ppc", "version"},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			return firefoxUserAgent(f), nil
 		},
@@ -378,6 +398,8 @@ func addInternetLookup() {
 		Description: "The specific identification string sent by the Opera web browser when making requests on the internet",
 		Example:     "Opera/8.39 (Macintosh; U; PPC Mac OS X 10_8_7; en-US) Presto/2.9.335 Version/10.00",
 		Output:      "string",
+		Aliases:     []string{"opera ua", "opera browser ua", "opera identifier", "opera client", "opera user agent"},
+		Keywords:    []string{"opera", "presto", "ua", "browser", "useragent", "macintosh", "ppc", "os", "version"},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			return operaUserAgent(f), nil
 		},
@@ -389,6 +411,8 @@ func addInternetLookup() {
 		Description: "The specific identification string sent by the Safari web browser when making requests on the internet",
 		Example:     "Mozilla/5.0 (iPad; CPU OS 8_3_2 like Mac OS X; en-US) AppleWebKit/531.15.6 (KHTML, like Gecko) Version/4.0.5 Mobile/8B120 Safari/6531.15.6",
 		Output:      "string",
+		Aliases:     []string{"safari ua", "apple safari ua", "safari browser ua", "safari identifier", "safari user agent"},
+		Keywords:    []string{"safari", "apple", "ipad", "os", "applewebkit", "khtml", "gecko", "browser", "ua", "mobile"},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			return safariUserAgent(f), nil
 		},
@@ -397,9 +421,11 @@ func addInternetLookup() {
 	AddFuncLookup("httpstatuscode", Info{
 		Display:     "HTTP Status Code",
 		Category:    "internet",
-		Description: "Random http status code",
+		Description: "Random HTTP status code",
 		Example:     "200",
 		Output:      "int",
+		Aliases:     []string{"http status", "response code", "http response", "server status", "status identifier"},
+		Keywords:    []string{"http", "status", "code", "server", "response", "200", "404", "500", "301", "302", "401", "403"},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			return httpStatusCode(f), nil
 		},
@@ -411,6 +437,8 @@ func addInternetLookup() {
 		Description: "Three-digit number returned by a web server to indicate the outcome of an HTTP request",
 		Example:     "404",
 		Output:      "int",
+		Aliases:     []string{"http status simple", "simple response code", "http response simple", "status code", "server code"},
+		Keywords:    []string{"http", "status", "code", "server", "response", "200", "404", "500", "301", "302", "401", "403"},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			return httpStatusCodeSimple(f), nil
 		},
@@ -422,6 +450,8 @@ func addInternetLookup() {
 		Description: "Number indicating the version of the HTTP protocol used for communication between a client and a server",
 		Example:     "HTTP/1.1",
 		Output:      "string",
+		Aliases:     []string{"http version", "protocol version", "http protocol", "http identifier", "http version string"},
+		Keywords:    []string{"http", "version", "protocol", "communication", "client", "server"},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			return httpVersion(f), nil
 		},
@@ -433,8 +463,11 @@ func addInternetLookup() {
 		Description: "Unique identifier assigned to network interfaces, often used in Ethernet networks",
 		Example:     "cb:ce:06:94:22:e9",
 		Output:      "string",
+		Aliases:     []string{"mac address", "hardware address", "ethernet address", "network identifier", "link-layer address"},
+		Keywords:    []string{"mac", "address", "hardware", "ethernet", "network", "identifier", "oui", "vendor", "colon", "hexadecimal"},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			return macAddress(f), nil
 		},
 	})
+
 }
