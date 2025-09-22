@@ -108,7 +108,7 @@ func creditCardNumber(f *Faker, cco *CreditCardOptions) string {
 	if cco == nil {
 		cco = &CreditCardOptions{}
 	}
-	if cco.Types == nil || len(cco.Types) == 0 {
+	if len(cco.Types) == 0 {
 		cco.Types = data.CreditCardTypes
 	}
 	ccType := randomString(f, cco.Types)
@@ -458,7 +458,7 @@ func addPaymentLookup() {
 		Example:     "491527954328",
 		Output:      "string",
 		Aliases: []string{
-			"ach account", "bank account", "checking account", "savings account", "account identifier",
+			"account number", "ach account", "bank account", "checking account", "savings account", "account identifier",
 		},
 		Keywords: []string{
 			"ach", "account", "banking", "checking", "savings", "finance", "electronic", "transfer", "payment",
@@ -476,7 +476,7 @@ func addPaymentLookup() {
 			"btc address", "bitcoin wallet", "crypto address", "public address", "payment address",
 		},
 		Keywords: []string{
-			"bitcoin", "btc", "address", "wallet", "blockchain", "public", "key", "hash", "base58",
+			"bitcoin", "btc", "wallet", "blockchain", "public", "key", "hash", "base58",
 		},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) { return bitcoinAddress(f), nil },
 	})
