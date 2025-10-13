@@ -56,6 +56,7 @@ func init() { initLookup() }
 // init will add all the functions to MapLookups
 func initLookup() {
 	addAddressLookup()
+	addAirlineLookup()
 	addAnimalLookup()
 	addAppLookup()
 	addAuthLookup()
@@ -99,7 +100,6 @@ func initLookup() {
 	addWordAdverbLookup()
 	addWordConnectiveLookup()
 	addWordGeneralLookup()
-	addWordGrammerLookup()
 	addWordNounLookup()
 	addWordPrepositionLookup()
 	addWordPronounLookup()
