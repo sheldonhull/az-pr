@@ -146,7 +146,7 @@ type Foo struct {
 	Int           int
 	Pointer       *int
 	Name          string         `fake:"{firstname}"`         // Any available function all lowercase
-	Sentence      string         `fake:"{sentence:3}"`        // Can call with parameters
+	Sentence      string         `fake:"{sentence}"`          
 	RandStr       string         `fake:"{randomstring:[hello,world]}"`
 	Number        string         `fake:"{number:1,10}"`       // Comma separated for multiple values
 	Regex         string         `fake:"{regex:[abcdef]{5}}"` // Generate string from regex
@@ -568,9 +568,9 @@ ConnectiveExamplify() string
 // Words
 Word() string
 
-// Sentences
-Sentence(wordCount int) string
-Paragraph(paragraphCount int, sentenceCount int, wordCount int, separator string) string
+// Text
+Sentence() string
+Paragraph() string
 LoremIpsumWord() string
 LoremIpsumSentence(wordCount int) string
 LoremIpsumParagraph(paragraphCount int, sentenceCount int, wordCount int, separator string) string
@@ -624,6 +624,7 @@ ImagePng(width int, height int) []byte
 
 ```go
 URL() string
+UrlSlug(words int) string
 DomainName() string
 DomainSuffix() string
 IPv4Address() string
@@ -728,8 +729,8 @@ HackerVerb() string
 
 ```go
 HipsterWord() string
-HipsterSentence(wordCount int) string
-HipsterParagraph(paragraphCount int, sentenceCount int, wordCount int, separator string) string
+HipsterSentence() string
+HipsterParagraph() string
 ```
 
 ### App
@@ -756,10 +757,29 @@ Bird() string
 
 ```go
 Emoji() string
-EmojiDescription() string
 EmojiCategory() string
 EmojiAlias() string
 EmojiTag() string
+EmojiFlag() string
+EmojiAnimal() string
+EmojiFood() string
+EmojiPlant() string
+EmojiMusic() string
+EmojiVehicle() string
+EmojiSport() string
+EmojiFace() string
+EmojiHand() string
+EmojiClothing() string
+EmojiLandmark() string
+EmojiElectronics() string
+EmojiGame() string
+EmojiTools() string
+EmojiWeather() string
+EmojiJob() string
+EmojiPerson() string
+EmojiGesture() string
+EmojiCostume() string
+EmojiSentence() string
 ```
 
 ### Language
