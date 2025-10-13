@@ -9,10 +9,10 @@
 #   - all
 registries:
   - type: standard
-    ref: v4.421.0 # renovate: depName=aquaproj/aqua-registry
+    ref: v4.427.0 # renovate: depName=aquaproj/aqua-registry
 packages:
   - name: golangci/golangci-lint@v1.64.8
-  - name: golang/go@go1.25.1
+  - name: golang/go@go1.25.2
     tags: ['first']
   - name: mvdan/gofumpt@v0.9.1
   - name: segmentio/golines@v0.13.0
