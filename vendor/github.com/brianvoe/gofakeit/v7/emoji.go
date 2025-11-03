@@ -507,11 +507,11 @@ func addEmojiLookup() {
 	AddFuncLookup("emojijob", Info{
 		Display:     "Emoji Job",
 		Category:    "emoji",
-		Description: "Unicode symbol representing people in occupations/roles",
+		Description: "Unicode symbol representing people in a role of employment",
 		Example:     "🧑‍💻",
 		Output:      "string",
 		Aliases:     []string{"job emoji", "occupation emoji", "career emoji", "profession emoji"},
-		Keywords:    []string{"emoji", "job", "occupation", "role", "profession", "worker", "person"},
+		Keywords:    []string{"emoji", "job", "role", "profession", "worker", "person"},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
 			return emojiJob(f), nil
 		},
