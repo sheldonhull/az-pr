@@ -427,6 +427,7 @@ FirstName() string
 MiddleName() string
 LastName() string
 Gender() string
+Age() int
 SSN() string
 EIN() string
 Hobby() string
@@ -646,6 +647,7 @@ ChromeUserAgent() string
 FirefoxUserAgent() string
 OperaUserAgent() string
 SafariUserAgent() string
+APIUserAgent() string
 ```
 
 ### HTML
