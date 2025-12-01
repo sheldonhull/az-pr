@@ -99,6 +99,14 @@ func (f *Faker) Age() int { return age(f) }
 
 func age(f *Faker) int { return randIntRange(f, 0, 100) }
 
+// Ethnicity will generate a random ethnicity string
+func Ethnicity() string { return ethnicity(GlobalFaker) }
+
+// Ethnicity will generate a random ethnicity string
+func (f *Faker) Ethnicity() string { return ethnicity(f) }
+
+func ethnicity(f *Faker) string { return getRandValue(f, []string{"person", "ethnicity"}) }
+
 // SSN will generate a random Social Security Number
 func SSN() string { return ssn(GlobalFaker) }
 
@@ -321,7 +329,7 @@ func addPersonLookup() {
 			"individual data",
 		},
 		Keywords: []string{
-			"person", "profile", "identity", "individual",
+			"profile", "identity", "individual",
 			"user", "account", "record", "contact",
 			"name", "details", "attributes", "information",
 			"bio", "demographics", "personal", "data",
@@ -346,7 +354,7 @@ func addPersonLookup() {
 			"display name",
 		},
 		Keywords: []string{
-			"name", "fullname", "given", "family",
+			"fullname", "given", "family",
 			"first", "last", "forename", "surname",
 			"display", "legal",
 		},
@@ -476,7 +484,7 @@ func addPersonLookup() {
 			"presentation",
 		},
 		Keywords: []string{
-			"gender", "male", "female", "nonbinary",
+			"male", "female", "nonbinary",
 			"identity", "label", "category", "sex",
 		},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) { return gender(f), nil },
@@ -500,6 +508,28 @@ func addPersonLookup() {
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) { return age(f), nil },
 	})
 
+	// ethnicity
+	AddFuncLookup("ethnicity", Info{
+		Display:     "Ethnicity",
+		Category:    "person",
+		Description: "Classification that identifies a person's cultural or ethnic background",
+		Example:     "German",
+		Output:      "string",
+		Aliases: []string{
+			"ethnic background",
+			"ethnic identity",
+			"cultural background",
+			"cultural heritage",
+			"ethnic origin",
+		},
+		Keywords: []string{
+			"ethnic", "heritage", "ancestry",
+			"origin", "identity", "cultural", "nationality",
+			"background", "descent", "lineage",
+		},
+		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) { return ethnicity(f), nil },
+	})
+
 	// ssn
 	AddFuncLookup("ssn", Info{
 		Display:     "SSN",
@@ -515,7 +545,7 @@ func addPersonLookup() {
 			"federal id",
 		},
 		Keywords: []string{
-			"ssn", "social", "security", "number",
+			"social", "security", "number",
 			"us", "tax", "irs", "employment",
 			"benefits", "identification",
 		},
@@ -536,7 +566,7 @@ func addPersonLookup() {
 			"irs number",
 		},
 		Keywords: []string{
-			"ein", "employer", "identification", "tax", "business", "federal", "irs", "number", "id",
+			"employer", "identification", "tax", "business", "federal", "irs", "number", "id",
 		},
 		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) { return ein(f), nil },
 	})
@@ -556,7 +586,7 @@ func addPersonLookup() {
 			"free-time pursuit",
 		},
 		Keywords: []string{
-			"hobby", "leisure", "recreation",
+			"leisure", "recreation",
 			"activity", "sport", "craft",
 			"game", "collection",
 		},
@@ -647,7 +677,7 @@ func addPersonLookup() {
 			"electronic mailbox",
 		},
 		Keywords: []string{
-			"email", "address", "mail", "inbox",
+			"address", "mail", "inbox",
 			"account", "contact", "sender", "recipient",
 			"domain", "username",
 		},
@@ -669,7 +699,7 @@ func addPersonLookup() {
 			"voice number",
 		},
 		Keywords: []string{
-			"phone", "number", "telephone", "mobile",
+			"number", "telephone", "mobile",
 			"contact", "dial", "cell", "landline",
 			"e164", "voice",
 		},
@@ -728,7 +758,7 @@ func addPersonLookup() {
 			"roster builder",
 		},
 		Keywords: []string{
-			"teams", "randomly", "person", "into",
+			"randomly", "person", "into",
 			"distribution", "allocation", "roster", "squad",
 		},
 		Params: []Param{
