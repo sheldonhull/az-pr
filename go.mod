@@ -2,14 +2,14 @@ module github.com/sheldonhull/az-pr
 
 go 1.25
 
-toolchain go1.25.4
+toolchain go1.25.5
 
 require (
 	al.essio.dev/pkg/shellescape v1.6.0
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/bitfield/script v0.24.1
 	github.com/brianstrauch/cobra-shell v0.5.0
-	github.com/brianvoe/gofakeit/v7 v7.12.0
+	github.com/brianvoe/gofakeit/v7 v7.12.1
 	github.com/c-bata/go-prompt v0.2.6
 	github.com/charmbracelet/bubbles v0.21.1-0.20250623103423-23b8fd6302d7
 	github.com/go-git/go-git/v5 v5.16.4
@@ -18,7 +18,7 @@ require (
 	github.com/magefile/mage v1.15.0
 	github.com/pterm/pterm v0.12.82
 	github.com/sheldonhull/magetools v1.0.2
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 )
 
 require (
