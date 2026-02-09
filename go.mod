@@ -2,7 +2,7 @@ module github.com/sheldonhull/az-pr
 
 go 1.25
 
-toolchain go1.25.6
+toolchain go1.25.7
 
 require (
 	al.essio.dev/pkg/shellescape v1.6.0
