@@ -15,7 +15,7 @@ require (
 	github.com/go-git/go-git/v5 v5.18.0
 	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
 	github.com/ivanpirog/coloredcobra v1.0.1
-	github.com/magefile/mage v1.16.1
+	github.com/magefile/mage v1.17.1
 	github.com/pterm/pterm v0.12.83
 	github.com/sheldonhull/magetools v1.0.2
 	github.com/spf13/cobra v1.10.2
