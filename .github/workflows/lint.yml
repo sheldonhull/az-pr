@@ -18,12 +18,12 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       # Automatically caches for performance as well
       # https://github.com/reviewdog/action-golangci-lint
       # - name: golangci-lint
       #   uses: reviewdog/action-golangci-lint@70498f2d1f75a55ee9a4d719e74e21ed68aebea3 # renovate: tag=v2
       - name: trunk-check
-        uses: trunk-io/trunk-action@75699af9e26881e564e9d832ef7dc3af25ec031b # v1
+        uses: trunk-io/trunk-action@04ba50e7658c81db7356da96657e6e77f220bfa3 # v1.3.1
         with:
           arguments: --github-annotate-new-only=false
