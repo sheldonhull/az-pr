@@ -4,7 +4,6 @@
 [![GoDoc](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/alessio/shellescape?tab=overview)
 [![sourcegraph](https://sourcegraph.com/github.com/alessio/shellescape/-/badge.svg)](https://sourcegraph.com/github.com/alessio/shellescape)
 [![codecov](https://codecov.io/gh/alessio/shellescape/branch/master/graph/badge.svg)](https://codecov.io/gh/alessio/shellescape)
-[![Go Report Card](https://goreportcard.com/badge/github.com/alessio/shellescape)](https://goreportcard.com/report/github.com/alessio/shellescape)
 
 Escape arbitrary strings for safe use as command line arguments.
 
@@ -35,6 +34,7 @@ func main() {
 }
 
 ```
+
 _[See in Go Playground](https://play.golang.org/p/Wj2WoUfH_d)_
 
 Especially when creating pipeline of commands which might end up being
@@ -57,6 +57,7 @@ func main() {
         fmt.Printf("ls -l %s\n", shellescape.Quote(os.Args[1]))
 }
 ```
+
 _[See in Go Playground](https://go.dev/play/p/GeguukpSUTk)_
 
 ## The escargs utility

@@ -56,6 +56,17 @@ func rgbColor(f *Faker) []int {
 	return []int{randIntRange(f, 0, 255), randIntRange(f, 0, 255), randIntRange(f, 0, 255)}
 }
 
+// HSLColor will generate a random HSL color slice [hue, saturation, lightness]
+func HSLColor() []int { return hslColor(GlobalFaker) }
+
+// HSLColor will generate a random HSL color slice [hue, saturation, lightness]
+func (f *Faker) HSLColor() []int { return hslColor(f) }
+
+func hslColor(f *Faker) []int {
+	// Hue is 0-360, Saturation and Lightness are 0-100%
+	return []int{randIntRange(f, 0, 360), randIntRange(f, 0, 100), randIntRange(f, 0, 100)}
+}
+
 func addColorLookup() {
 	AddFuncLookup("color", Info{
 		Display:     "Color",
@@ -123,5 +134,19 @@ func addColorLookup() {
 			return rgbColor(f), nil
 		},
 	})
+	AddFuncLookup("hslcolor", Info{
+		Display:     "HSL Color",
+		Category:    "color",
+		Description: "Color defined by hue, saturation, and lightness values",
+		Example:     "[210, 85, 50]",
+		Output:      "[]int",
+		ContentType: "application/json",
+		Aliases:     []string{"hsl triplet", "hsl array", "hsl value", "hue saturation lightness"},
+		Keywords:    []string{"hsl", "color", "hue", "saturation", "lightness", "brightness", "triplet", "palette", "css"},
+		Generate: func(f *Faker, m *MapParams, info *Info) (any, error) {
+			return hslColor(f), nil
+		},
+	})
+
 
 }
